@@ -24,7 +24,7 @@ export default function MobileMenu() {
         aria-label={isOpen ? "Close menu" : "Open menu"}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="grid size-10 place-items-center rounded-xl border border-border bg-surface/60 transition-colors hover:border-accent/40"
+        className="grid size-10 cursor-pointer place-items-center rounded-xl border border-border bg-surface/60 transition-colors hover:border-accent/40"
       >
         {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>

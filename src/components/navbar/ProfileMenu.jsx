@@ -28,7 +28,7 @@ export default function ProfileMenu() {
         aria-label="Open profile menu"
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="flex items-center gap-2.5 rounded-full border border-border bg-surface/60 p-1 transition-colors hover:border-accent/40 md:pr-3"
+        className="flex cursor-pointer items-center gap-2.5 rounded-full border border-border bg-surface/60 p-1 transition-colors hover:border-accent/40 md:pr-3"
       >
         <Avatar className="size-8 text-xs" />
         <span className="hidden text-left leading-tight md:block">
@@ -68,7 +68,7 @@ export default function ProfileMenu() {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-500/10"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-500/10"
           >
             <LogOut className="size-4" />
             Sign out

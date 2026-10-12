@@ -46,7 +46,7 @@ export default function ThemeSettings() {
         onClick={() => setIsOpen(true)}
         aria-label="Open theme settings"
         aria-expanded={isOpen}
-        className="fixed right-0 top-1/2 z-30 -translate-y-1/2 rounded-l-2xl bg-accent-strong p-3 text-accent-foreground shadow-lg shadow-accent/40 transition-all duration-300 hover:pr-4"
+        className="fixed right-0 top-1/2 z-30 cursor-pointer -translate-y-1/2 rounded-l-2xl bg-accent-strong p-3 text-accent-foreground shadow-lg shadow-accent/40 transition-all duration-300 hover:pr-4"
       >
         <Settings className="size-6 animate-[spin_4s_linear_infinite]" />
       </button>
@@ -83,7 +83,7 @@ export default function ThemeSettings() {
             type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Close theme settings"
-            className="grid size-9 place-items-center rounded-lg transition-colors hover:bg-white/15"
+            className="grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-white/15"
           >
             <X className="size-5" />
           </button>

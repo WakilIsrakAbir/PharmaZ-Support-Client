@@ -18,7 +18,7 @@ export default function NavDropdown({ group, pathname, isOpen, onToggle, onClose
         aria-expanded={isOpen}
         aria-controls={panelId}
         className={cn(
-          "flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+          "flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
           isActive
             ? "border-accent/40 bg-accent/15 text-accent-text"
             : "border-transparent text-foreground/75 hover:bg-elevated hover:text-foreground",
