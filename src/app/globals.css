@@ -1,20 +1,120 @@
 @import "tailwindcss";
 
+/*
+ * Theme tokens
+ *
+ * <html data-theme="light | dark | system" data-accent="emerald | teal | ...">
+ *
+ * light-dark(a, b) picks `a` in light mode and `b` in dark mode, based on
+ * `color-scheme`. "system" allows both, so the browser follows the OS setting.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --background: light-dark(#f2f6f3, #050a08);
+  --surface: light-dark(#ffffff, #0a120f);
+  --elevated: light-dark(#edf2ee, #0f1721);
+  --border: light-dark(#d9e3dc, #1c2730);
+  --foreground: light-dark(#0f1d17, #e4ece8);
+  --muted: light-dark(#5b6b63, #8b99a3);
+
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+
+  /* Darker shade for filled buttons, and a shade that stays readable as text */
+  --accent-strong: color-mix(in oklab, var(--accent) 78%, black);
+  --accent-text: light-dark(
+    color-mix(in oklab, var(--accent) 72%, black),
+    color-mix(in oklab, var(--accent) 78%, white)
+  );
+}
+
+[data-theme="light"] {
   color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="system"] {
+  color-scheme: light dark;
+}
+
+[data-accent="emerald"] {
+  --accent: #10b981;
+}
+
+[data-accent="teal"] {
+  --accent: #14b8a6;
+}
+
+[data-accent="indigo"] {
+  --accent: #6366f1;
+}
+
+[data-accent="sky"] {
+  --accent: #0ea5e9;
+}
+
+[data-accent="rose"] {
+  --accent: #f43f5e;
+}
+
+[data-accent="purple"] {
+  --accent: #a855f7;
+}
+
+[data-accent="amber"] {
+  --accent: #f59e0b;
+  --accent-foreground: #1f1503;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-text: var(--accent-text);
+  --color-accent-foreground: var(--accent-foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    /* Keeps anchor targets from hiding under the sticky navbar */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Tailwind v4 gives buttons the default arrow cursor, so bring the pointer back */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
 }
