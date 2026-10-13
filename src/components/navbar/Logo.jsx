@@ -10,10 +10,10 @@ export default function Logo() {
 
       <span className="leading-none">
         <span className="block text-[17px] font-extrabold tracking-tight">
-          SUPPORT<span className="text-accent">.</span>TOOL
+          PharmaZ<span className="text-accent">.</span>247
         </span>
         <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
-          Demo Workspace
+          Support Tool
         </span>
       </span>
     </Link>

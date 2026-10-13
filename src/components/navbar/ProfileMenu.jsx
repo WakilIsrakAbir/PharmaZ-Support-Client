@@ -3,17 +3,18 @@
 import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDismiss } from "@/hooks/useDismiss";
+import { logOut } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-// Placeholder user until authentication is connected.
-const currentUser = {
-  name: "Demo User",
-  role: "Support Agent",
-  email: "demo.user@example.com",
+const ROLE_LABELS = {
+  agent: "Support Agent",
+  admin: "Administrator",
 };
 
 export default function ProfileMenu() {
+  const user = useCurrentUser();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const panelId = useId();
@@ -30,10 +31,16 @@ export default function ProfileMenu() {
         aria-controls={panelId}
         className="flex cursor-pointer items-center gap-2.5 rounded-full border border-border bg-surface/60 p-1 transition-colors hover:border-accent/40 md:pr-3"
       >
-        <Avatar className="size-8 text-xs" />
+        <Avatar name={user?.name} className="size-8 text-xs" />
         <span className="hidden text-left leading-tight md:block">
-          <span className="block text-sm font-semibold">{currentUser.name}</span>
-          <span className="block text-[11px] text-muted">{currentUser.role}</span>
+          {user ? (
+            <>
+              <span className="block text-sm font-semibold">{user.name}</span>
+              <span className="block text-[11px] text-muted">{ROLE_LABELS[user.role]}</span>
+            </>
+          ) : (
+            <LoadingText />
+          )}
         </span>
         <ChevronDown
           className={cn("hidden size-4 text-muted transition-transform duration-200 md:block", isOpen && "rotate-180")}
@@ -48,10 +55,10 @@ export default function ProfileMenu() {
         )}
       >
         <div className="flex items-center gap-3 rounded-xl bg-elevated p-3">
-          <Avatar className="size-10 text-sm" />
+          <Avatar name={user?.name} className="size-10 text-sm" />
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{currentUser.name}</p>
-            <p className="truncate text-xs text-muted">{currentUser.email}</p>
+            <p className="truncate text-sm font-semibold">{user?.name}</p>
+            <p className="truncate text-xs text-muted">{user?.email}</p>
           </div>
         </div>
 
@@ -67,7 +74,7 @@ export default function ProfileMenu() {
 
           <button
             type="button"
-            onClick={() => setIsOpen(false)}
+            onClick={logOut}
             className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-500/10"
           >
             <LogOut className="size-4" />
@@ -79,10 +86,12 @@ export default function ProfileMenu() {
   );
 }
 
-function Avatar({ className }) {
-  const initials = currentUser.name
+function Avatar({ name, className }) {
+  // "Wakil Israk Abir" -> "WI"
+  const initials = (name ?? "")
     .split(" ")
-    .map((word) => word[0])
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
     .join("");
 
   return (
@@ -94,6 +103,15 @@ function Avatar({ className }) {
     >
       {initials}
       <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500" />
+    </span>
+  );
+}
+
+function LoadingText() {
+  return (
+    <span className="block space-y-1.5 py-0.5">
+      <span className="block h-3 w-20 animate-pulse rounded bg-elevated" />
+      <span className="block h-2.5 w-14 animate-pulse rounded bg-elevated" />
     </span>
   );
 }

@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/navbar/Navbar";
 import ThemeScript from "@/components/theme/ThemeScript";
 import ThemeSettings from "@/components/theme/ThemeSettings";
 import { DEFAULT_ACCENT, DEFAULT_MODE } from "@/config/theme";
@@ -42,8 +41,7 @@ export default function RootLayout({ children }) {
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="flex-1">{children}</main>
+        {children}
         <ThemeSettings />
       </body>
     </html>
