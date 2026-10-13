@@ -4,4 +4,4 @@
 export const HOME_PATH = "/overview/dashboard";
 
 /** Pages for logged-out visitors. */
-export const AUTH_PAGES = ["/login", "/register"];
+export const AUTH_PAGES = ["/login", "/register", "/forgot-password", "/reset-password"];

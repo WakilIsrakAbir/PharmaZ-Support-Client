@@ -148,9 +148,11 @@ export const PROBLEM_AREAS = [
 // Every area also gets this as its last choice.
 export const OTHER_ISSUE = "Something else";
 
+// Keep every `value` below in sync with server/src/modules/calls/call.constants.js.
+
 export const CALL_DIRECTIONS = [
-  { value: "inbound", label: "Inbound", icon: PhoneIncoming },
-  { value: "outbound", label: "Outbound", icon: PhoneOutgoing },
+  { value: "inbound", label: "Inbound", icon: PhoneIncoming, className: "text-teal-500" },
+  { value: "outbound", label: "Outbound", icon: PhoneOutgoing, className: "text-sky-500" },
 ];
 
 export const PRIORITIES = [
@@ -161,9 +163,16 @@ export const PRIORITIES = [
 ];
 
 export const CALL_STATUSES = [
-  "Resolved on call",
-  "Follow-up needed",
-  "Escalated to tech team",
-  "Callback scheduled",
-  "Customer unreachable",
+  { value: "completed", label: "Completed", className: "bg-emerald-500/10 text-emerald-500 ring-emerald-500/30" },
+  { value: "pending", label: "Pending", className: "bg-amber-500/10 text-amber-500 ring-amber-500/30" },
+  { value: "resolved", label: "Resolved", className: "bg-sky-500/10 text-sky-500 ring-sky-500/30" },
+  { value: "under-review", label: "Under Review", className: "bg-violet-500/10 text-violet-500 ring-violet-500/30" },
 ];
+
+// A new call is pending until someone marks it otherwise
+export const DEFAULT_STATUS = "pending";
+
+/** Looks up an option by its value, e.g. findOption(CALL_STATUSES, "resolved"). */
+export function findOption(options, value) {
+  return options.find((option) => option.value === value);
+}

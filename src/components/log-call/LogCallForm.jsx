@@ -1,11 +1,21 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CircleCheck, Flag, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
+import Link from "next/link";
+import { CircleCheck, Flag, LoaderCircle, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
+import FormAlert from "@/components/auth/FormAlert";
 import { Field, Select, inputClass } from "@/components/ui/FormControls";
-import { CALL_DIRECTIONS, CALL_STATUSES, OTHER_ISSUE, PRIORITIES, PROBLEM_AREAS } from "@/config/call-log";
+import FormSection from "@/components/ui/FormSection";
+import {
+  CALL_DIRECTIONS,
+  CALL_STATUSES,
+  DEFAULT_STATUS,
+  OTHER_ISSUE,
+  PRIORITIES,
+  PROBLEM_AREAS,
+} from "@/config/call-log";
+import { api } from "@/lib/api";
 import CallTimeBadge from "./CallTimeBadge";
-import FormSection from "./FormSection";
 import ProblemAreaPicker from "./ProblemAreaPicker";
 import SegmentedControl from "./SegmentedControl";
 
@@ -17,7 +27,7 @@ const EMPTY_FORM = {
   issue: "",
   priority: "normal",
   direction: "inbound",
-  status: CALL_STATUSES[0],
+  status: DEFAULT_STATUS,
   duration: "",
   calledAt: "", // empty means "now"
   outcome: "",
@@ -45,9 +55,24 @@ function validate(form) {
   return errors;
 }
 
+/** The form's values in the shape POST /api/calls expects. */
+function toRequestBody({ duration, calledAt, area, ...form }) {
+  const [minutes, seconds] = duration.split(":").map(Number);
+
+  return {
+    ...form,
+    area: area || undefined,
+    durationSeconds: duration ? minutes * 60 + seconds : undefined,
+    // The picker gives local time ("2026-10-13T15:20"). Left empty, the server uses "now".
+    calledAt: calledAt ? new Date(calledAt).toISOString() : undefined,
+  };
+}
+
 export default function LogCallForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loggedCall, setLoggedCall] = useState(null);
   const mobileRef = useRef(null);
 
@@ -66,10 +91,12 @@ export default function LogCallForm() {
   function clearForm() {
     setForm(EMPTY_FORM);
     setErrors({});
+    setFormError("");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setFormError("");
 
     const newErrors = validate(form);
     if (Object.keys(newErrors).length > 0) {
@@ -78,23 +105,36 @@ export default function LogCallForm() {
       return;
     }
 
-    const call = {
-      ...form,
-      mobile: form.mobile.replace(/[\s-]/g, ""),
-      calledAt: form.calledAt || new Date().toISOString(),
-    };
+    setIsSubmitting(true);
 
-    // TODO: send `call` to the API once the backend is ready.
-    setLoggedCall(call);
-    clearForm();
+    try {
+      const { data } = await api("/calls", { method: "POST", body: toRequestBody(form) });
+      setLoggedCall(data);
+      clearForm();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      // The server calls the duration "durationSeconds"; the form calls it "duration"
+      const { durationSeconds, ...fields } = error.fields ?? {};
+      if (durationSeconds) fields.duration = durationSeconds;
+
+      // Problems with a field that has no error slot (e.g. calledAt) go above the form
+      const hiddenField = Object.keys(fields).find((name) => !(name in EMPTY_FORM));
+
+      setErrors(fields);
+      if (hiddenField) setFormError(fields[hiddenField]);
+      else if (Object.keys(fields).length === 0) setFormError(error.message);
+    }
+
+    setIsSubmitting(false);
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+      {/* Stays under the navbar while scrolling, so "Log call" is always in reach */}
+      <div className="sticky top-16 z-30 -mt-4 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/90 pb-5 pt-4 backdrop-blur-xl">
         <div>
-          <h1 className="text-2xl font-bold">Log a Call</h1>
-          <p className="text-sm text-muted">Capture the customer and the call details.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Log a Call</h1>
+          <p className="mt-1 text-sm text-muted">Capture the customer and the call details.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -108,24 +148,30 @@ export default function LogCallForm() {
           </button>
           <button
             type="submit"
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-accent-strong px-5 py-2.5 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            disabled={isSubmitting}
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-accent-strong px-5 py-2.5 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/30 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-wait disabled:opacity-80 disabled:hover:translate-y-0"
           >
-            <Send className="size-4" />
-            Log call
+            {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
+            {isSubmitting ? "Logging..." : "Log call"}
           </button>
         </div>
       </div>
 
+      <FormAlert message={formError} />
+
       {loggedCall && (
         <div
           role="status"
-          className="flex items-center gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm"
         >
           <CircleCheck className="size-5 shrink-0 text-accent-text" />
           <p className="flex-1">
             <span className="font-semibold">Call logged</span> for {loggedCall.mobile}
             {loggedCall.issue && <span className="text-muted"> · {loggedCall.issue}</span>}
           </p>
+          <Link href="/calls/logs" className="font-semibold text-accent-text hover:underline">
+            View in Call Logs
+          </Link>
           <button
             type="button"
             onClick={() => setLoggedCall(null)}
@@ -154,7 +200,7 @@ export default function LogCallForm() {
                 className={`${inputClass} font-mono aria-invalid:border-rose-500`}
               />
             </Field>
-            <Field label="Customer ID" htmlFor="customerId" optional>
+            <Field label="Customer ID" htmlFor="customerId" optional error={errors.customerId}>
               <input
                 id="customerId"
                 placeholder="e.g. PZ004182"
@@ -163,7 +209,7 @@ export default function LogCallForm() {
                 className={inputClass}
               />
             </Field>
-            <Field label="Invoice / Transaction no." htmlFor="transactionNo" optional>
+            <Field label="Invoice / Transaction no." htmlFor="transactionNo" optional error={errors.transactionNo}>
               <input
                 id="transactionNo"
                 placeholder="e.g. INV00418203"
@@ -225,7 +271,9 @@ export default function LogCallForm() {
             <Field label="Status" htmlFor="status">
               <Select id="status" value={form.status} onChange={(event) => updateField("status", event.target.value)}>
                 {CALL_STATUSES.map((status) => (
-                  <option key={status}>{status}</option>
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
                 ))}
               </Select>
             </Field>
@@ -242,7 +290,7 @@ export default function LogCallForm() {
             </Field>
           </div>
 
-          <Field label="Outcome" htmlFor="outcome" optional>
+          <Field label="Outcome" htmlFor="outcome" optional error={errors.outcome}>
             <textarea
               id="outcome"
               rows={2}
@@ -253,7 +301,7 @@ export default function LogCallForm() {
             />
           </Field>
 
-          <Field label="Comments" htmlFor="comments" optional>
+          <Field label="Comments" htmlFor="comments" optional error={errors.comments}>
             <textarea
               id="comments"
               rows={3}

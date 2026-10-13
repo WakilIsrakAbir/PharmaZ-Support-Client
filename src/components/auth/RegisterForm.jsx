@@ -1,7 +1,9 @@
 "use client";
 
 import { Mail, UserRound } from "lucide-react";
-import { useAuthForm } from "@/hooks/useAuthForm";
+import { useForm } from "@/hooks/useForm";
+import { api } from "@/lib/api";
+import { getRedirectPath, goTo } from "@/lib/auth";
 import AuthField from "./AuthField";
 import FormAlert from "./FormAlert";
 import PasswordField from "./PasswordField";
@@ -17,13 +19,17 @@ function validate({ name, email, password, confirmPassword }) {
   return errors;
 }
 
+// The API doesn't need the confirmation, only the password itself
+async function register({ name, email, password }) {
+  await api("/auth/register", { method: "POST", body: { name, email, password } });
+  await goTo(getRedirectPath());
+}
+
 export default function RegisterForm() {
-  const { values, errors, formError, isSubmitting, handleChange, handleSubmit } = useAuthForm({
+  const { values, errors, formError, isSubmitting, handleChange, handleSubmit } = useForm({
     initialValues: { name: "", email: "", password: "", confirmPassword: "" },
-    endpoint: "/auth/register",
     validate,
-    // The API doesn't need the confirmation, only the password itself
-    toBody: ({ name, email, password }) => ({ name, email, password }),
+    onSubmit: register,
   });
 
   return (

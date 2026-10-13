@@ -1,4 +1,5 @@
-export default function FormSection({ icon: Icon, title, subtitle, action, children }) {
+/** A card with an icon header, used to group form fields. `footer` adds a bar for actions. */
+export default function FormSection({ icon: Icon, title, subtitle, action, footer, children }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
       <header className="relative flex items-center gap-3 border-b border-border bg-linear-to-r from-elevated to-transparent px-5 py-4">
@@ -14,6 +15,12 @@ export default function FormSection({ icon: Icon, title, subtitle, action, child
       </header>
 
       <div className="space-y-5 p-5">{children}</div>
+
+      {footer && (
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-elevated/40 px-5 py-4">
+          {footer}
+        </footer>
+      )}
     </section>
   );
 }

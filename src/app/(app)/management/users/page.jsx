@@ -1,7 +1,9 @@
+import PageShell from "@/components/ui/PageShell";
+
 export const metadata = {
   title: "Users",
 };
 
 export default function UsersPage() {
-  return <h1 className="px-6 py-8 text-2xl font-bold">Users</h1>;
+  return <PageShell title="Users" subtitle="Everyone with access to the support tool." />;
 }

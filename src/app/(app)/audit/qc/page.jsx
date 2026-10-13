@@ -1,7 +1,9 @@
+import PageShell from "@/components/ui/PageShell";
+
 export const metadata = {
   title: "QC",
 };
 
-export default function QCPage() {
-  return <h1 className="px-6 py-8 text-2xl font-bold">QC</h1>;
+export default function QcPage() {
+  return <PageShell title="QC" subtitle="Quality control reviews." />;
 }

@@ -112,3 +112,47 @@
     }
   }
 }
+
+/* Fine diagonal cross-hatch, like the security print on an ID card. Uses the text colour. */
+@utility bg-crosshatch {
+  background-image:
+    repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(-45deg, currentColor 0 1px, transparent 1px 14px);
+}
+
+/*
+ * Page width, shared by the navbar and every page so their edges line up.
+ *
+ *   Phone   (< 640px)       full width, 16px side gutters
+ *   Medium  (640 – 1023px)  full width, 24px side gutters
+ *   Large   (1024 – 1279px) full width, 32px side gutters
+ *   XL      (1280px +)      content stops growing at 1280px and is centred
+ */
+:root {
+  --page-gutter: 1rem;
+  --page-max-width: 80rem;
+}
+
+@media (width >= 40rem) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
+}
+
+@media (width >= 64rem) {
+  :root {
+    --page-gutter: 2rem;
+  }
+}
+
+@utility page-container {
+  width: 100%;
+  max-width: calc(var(--page-max-width) + 2 * var(--page-gutter));
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+/* The page behind an open modal (e.g. call details) shouldn't scroll */
+html:has(dialog[open]) {
+  overflow: hidden;
+}

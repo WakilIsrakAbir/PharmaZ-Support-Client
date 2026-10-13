@@ -4,17 +4,28 @@ import { cn } from "@/lib/utils";
 export const inputClass =
   "w-full rounded-xl border border-border bg-background/40 px-4 py-3 text-sm outline-none transition-colors placeholder:text-muted/70 hover:border-accent/40 focus:border-accent focus:ring-4 focus:ring-accent/15";
 
-export function Field({ label, htmlFor, required, optional, hint, error, children }) {
+/**
+ * A label, the input passed as children, and an error or help text underneath.
+ * `labelAction` sits at the right of the label, e.g. a "Forgot password?" link.
+ */
+export function Field({ label, htmlFor, required, optional, hint, help, error, labelAction, children }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-2 flex flex-wrap items-baseline gap-x-1.5 text-sm font-semibold">
-        {label}
-        {required && <span className="text-rose-500">*</span>}
-        {optional && <span className="text-xs font-normal text-muted">(optional)</span>}
-        {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
-      </label>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <label htmlFor={htmlFor} className="flex flex-wrap items-baseline gap-x-1.5 text-sm font-semibold">
+          {label}
+          {required && <span className="text-rose-500">*</span>}
+          {optional && <span className="text-xs font-normal text-muted">(optional)</span>}
+          {hint && <span className="text-xs font-normal text-muted">{hint}</span>}
+        </label>
+        {labelAction}
+      </div>
       {children}
-      {error && <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>}
+      {error ? (
+        <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>
+      ) : (
+        help && <p className="mt-1.5 text-xs text-muted">{help}</p>
+      )}
     </div>
   );
 }

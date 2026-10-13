@@ -33,11 +33,11 @@ export default function MobileMenu() {
         id={panelId}
         aria-label="Mobile"
         className={cn(
-          "absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border bg-surface px-4 py-5 shadow-xl transition-all duration-200 sm:px-6",
+          "absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-border bg-surface py-5 shadow-xl transition-all duration-200",
           isOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
         )}
       >
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="page-container grid gap-5 sm:grid-cols-2">
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
               <p className="mb-2 px-2.5 text-[11px] font-bold uppercase tracking-wider text-muted">

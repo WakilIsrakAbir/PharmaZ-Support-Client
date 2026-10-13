@@ -12,12 +12,21 @@ export function getRedirectPath() {
   return next?.startsWith("/") && !next.startsWith("//") ? next : HOME_PATH;
 }
 
+/**
+ * A full page load, so proxy.js sees the new login cookie straight away.
+ * The returned promise never settles, which keeps the form in its "submitting"
+ * state until the next page appears.
+ */
+export function goTo(path) {
+  window.location.assign(path);
+  return new Promise(() => {});
+}
+
 export async function logOut() {
   await api("/auth/logout", { method: "POST" }).catch(() => {});
 
   // A full page load (not router.push) on purpose: Next.js keeps visited pages alive in
   // memory, and this clears everything the previous user had open, as the Next.js docs
   // recommend for logout.
-  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-  window.location.assign("/login");
+  goTo("/login");
 }

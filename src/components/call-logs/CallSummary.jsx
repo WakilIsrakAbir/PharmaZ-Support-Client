@@ -1,0 +1,114 @@
+import { MessageSquareQuote, Pencil, Target } from "lucide-react";
+import { PRIORITIES, PROBLEM_AREAS, findOption } from "@/config/call-log";
+import { formatDate, formatDuration, formatTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { DialogBody, DialogFooter, secondaryButtonClass } from "./DialogParts";
+import { Dash, DirectionLabel, StatusBadge } from "./CallBadges";
+
+/** The read-only view of a call inside the details dialog. */
+export default function CallSummary({ call, canEdit, onEdit, onClose }) {
+  const area = findOption(PROBLEM_AREAS, call.area);
+
+  return (
+    <>
+      <DialogBody>
+        <section className="overflow-hidden rounded-xl border border-border bg-background/40">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">The call</h3>
+            <StatusBadge status={call.status} />
+          </div>
+          <dl className="grid divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <Stat label="Date & time">
+              <span className="block font-semibold">{formatDate(call.calledAt)}</span>
+              <span className="block font-mono text-xs text-muted">{formatTime(call.calledAt)}</span>
+            </Stat>
+            <Stat label="Duration">
+              <span className="font-mono font-semibold">{formatDuration(call.durationSeconds)}</span>
+            </Stat>
+            <Stat label="Direction">
+              <DirectionLabel direction={call.direction} />
+            </Stat>
+          </dl>
+        </section>
+
+        <dl className="grid gap-x-8 sm:grid-cols-2">
+          <Detail label="Support person">{call.createdBy?.name}</Detail>
+          <Detail label="Problem type">
+            {area && (
+              <>
+                {area.label}
+                {call.issue && <span className="mt-0.5 block text-xs font-normal text-muted">{call.issue}</span>}
+              </>
+            )}
+          </Detail>
+          <Detail label="Customer ID" mono>
+            {call.customerId}
+          </Detail>
+          <Detail label="Mobile" mono>
+            {call.mobile}
+          </Detail>
+          <Detail label="Transaction no." mono>
+            {call.transactionNo}
+          </Detail>
+          <Detail label="Priority">{findOption(PRIORITIES, call.priority)?.label}</Detail>
+        </dl>
+
+        <Note icon={Target} title="Outcome" text={call.outcome} emptyText="No outcome recorded." />
+        <Note icon={MessageSquareQuote} title="Comments" text={call.comments} emptyText="No comments recorded." />
+      </DialogBody>
+
+      <DialogFooter>
+        <button type="button" onClick={onClose} className={secondaryButtonClass}>
+          Close
+        </button>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-accent-strong px-5 py-2.5 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            <Pencil className="size-4" />
+            Update call
+          </button>
+        )}
+      </DialogFooter>
+    </>
+  );
+}
+
+function Stat({ label, children }) {
+  return (
+    <div className="px-4 py-3">
+      <dt className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{label}</dt>
+      <dd>{children}</dd>
+    </div>
+  );
+}
+
+function Detail({ label, mono, children }) {
+  return (
+    <div className="border-b border-border py-3">
+      <dt className="text-xs text-muted">{label}</dt>
+      <dd className={cn("mt-0.5 text-sm font-semibold", mono && "font-mono")}>{children || <Dash />}</dd>
+    </div>
+  );
+}
+
+function Note({ icon: Icon, title, text, emptyText }) {
+  return (
+    <section>
+      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <Icon className="size-4 text-accent-text" />
+        {title}
+      </h3>
+      <p
+        className={cn(
+          "whitespace-pre-line border-l-2 pl-3 text-sm",
+          text ? "border-accent/60" : "border-border italic text-muted",
+        )}
+      >
+        {text || emptyText}
+      </p>
+    </section>
+  );
+}

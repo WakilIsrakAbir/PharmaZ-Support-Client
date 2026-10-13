@@ -3,15 +3,12 @@
 import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
+import { ROLES } from "@/config/roles";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDismiss } from "@/hooks/useDismiss";
 import { logOut } from "@/lib/auth";
+import { getInitials } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const ROLE_LABELS = {
-  agent: "Support Agent",
-  admin: "Administrator",
-};
 
 export default function ProfileMenu() {
   const user = useCurrentUser();
@@ -36,7 +33,7 @@ export default function ProfileMenu() {
           {user ? (
             <>
               <span className="block text-sm font-semibold">{user.name}</span>
-              <span className="block text-[11px] text-muted">{ROLE_LABELS[user.role]}</span>
+              <span className="block text-[11px] text-muted">{ROLES[user.role]?.label}</span>
             </>
           ) : (
             <LoadingText />
@@ -87,13 +84,6 @@ export default function ProfileMenu() {
 }
 
 function Avatar({ name, className }) {
-  // "Wakil Israk Abir" -> "WI"
-  const initials = (name ?? "")
-    .split(" ")
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase())
-    .join("");
-
   return (
     <span
       className={cn(
@@ -101,7 +91,7 @@ function Avatar({ name, className }) {
         className,
       )}
     >
-      {initials}
+      {getInitials(name)}
       <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500" />
     </span>
   );
