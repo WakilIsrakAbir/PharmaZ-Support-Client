@@ -1,10 +1,11 @@
 import { Check } from "lucide-react";
 import { ACCENT_COLORS } from "@/config/theme";
+import { cn } from "@/lib/utils";
 import OptionCard from "./OptionCard";
 
-export default function AccentOptions({ value, onChange }) {
+export default function AccentOptions({ value, onChange, className }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className={cn("grid grid-cols-2 gap-2.5", className)}>
       {ACCENT_COLORS.map((accent) => {
         const isActive = value === accent.value;
 

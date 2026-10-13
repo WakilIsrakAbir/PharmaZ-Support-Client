@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Support Tool — client
 
-## Getting Started
+The web app for the support tool (Next.js 16, React 19, Tailwind 4). It talks only to
+the Express API in `../server`; every `/api/*` request is forwarded there (see
+`next.config.mjs`), so the login cookie stays on this site.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000, API expected on http://localhost:5000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set `API_URL` when the API runs somewhere else (`API_URL=https://api.example.com npm run build`).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Who sees what
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role | Lands on | Can use |
+| --- | --- | --- |
+| Super admin | All products (`/admin/products`) | Create products and choose their admins, all accounts, and every page of whichever product is open (switch in the sidebar header). |
+| Product admin | Dashboard | Their product: Log a Call, Logs, Users (add and remove support agents), Settings (problem areas and issues, statuses and priorities, form fields, name and colour). |
+| Support agent | Dashboard | Log a Call and Logs for their product. |
 
-## Learn More
+There's no sign-up. An admin creates each account and is shown a temporary password
+once; the person has to choose their own at their first sign-in.
 
-To learn more about Next.js, take a look at the following resources:
+## Where things are
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/(auth)/     login, forgot and reset password
+  app/(app)/      the signed-in app: admin/, overview/, calls/, management/, settings/, profile/
+  components/     one folder per area (admin, dashboard, call-logs, log-call, settings, users, sidebar, ui...)
+  config/         navigation, roles, routes, theme, colour and icon lists
+  hooks/          shared state: current user, product setup, forms, paged lists
+  lib/            API client, auth helpers, formatting
+  proxy.js        sends logged-out visitors to /login
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The product's problem areas, statuses, priorities and extra fields come from the API
+(`hooks/useProductSetup.js`); nothing product-specific is hard-coded here.

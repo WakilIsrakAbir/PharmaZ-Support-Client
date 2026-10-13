@@ -17,6 +17,24 @@ function readSetting(key, fallback) {
   }
 }
 
+// Until the person picks an accent, the product's colour is used (then the app's default)
+function defaultAccent() {
+  return readSetting(THEME_STORAGE_KEYS.productAccent, DEFAULT_ACCENT);
+}
+
+/** Remembers the product's colour and shows it, unless the person picked their own accent. */
+export function setProductAccent(color) {
+  try {
+    if (color) localStorage.setItem(THEME_STORAGE_KEYS.productAccent, color);
+    else localStorage.removeItem(THEME_STORAGE_KEYS.productAccent);
+  } catch {
+    // Storage blocked: the colour still applies below, just not before the next first paint
+  }
+
+  document.documentElement.dataset.accent = readSetting(THEME_STORAGE_KEYS.accent, color || DEFAULT_ACCENT);
+  listeners.forEach((listener) => listener());
+}
+
 function saveSetting(key, attribute, value) {
   document.documentElement.setAttribute(attribute, value);
 
@@ -39,7 +57,7 @@ export function useTheme() {
 
   const accent = useSyncExternalStore(
     subscribe,
-    () => readSetting(THEME_STORAGE_KEYS.accent, DEFAULT_ACCENT),
+    () => readSetting(THEME_STORAGE_KEYS.accent, defaultAccent()),
     () => DEFAULT_ACCENT,
   );
 
@@ -48,7 +66,7 @@ export function useTheme() {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = readSetting(THEME_STORAGE_KEYS.mode, DEFAULT_MODE);
-    root.dataset.accent = readSetting(THEME_STORAGE_KEYS.accent, DEFAULT_ACCENT);
+    root.dataset.accent = readSetting(THEME_STORAGE_KEYS.accent, defaultAccent());
   }, []);
 
   return {

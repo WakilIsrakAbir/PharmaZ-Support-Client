@@ -1,15 +1,27 @@
 import { ArrowRight, CalendarDays, ChevronDown, Search, X } from "lucide-react";
-import { CALL_DIRECTIONS, CALL_STATUSES, PROBLEM_AREAS } from "@/config/call-log";
+import { CALL_DIRECTIONS } from "@/config/call-log";
+import { useProductSetup } from "@/hooks/useProductSetup";
 import { DATE_RANGES, toInputDate } from "@/lib/call-filters";
 import { cn } from "@/lib/utils";
 
 const withAll = (label, options) => [{ value: "", label }, ...options];
 
 const DIRECTION_OPTIONS = withAll("All directions", CALL_DIRECTIONS);
-const TYPE_OPTIONS = withAll("All types", PROBLEM_AREAS);
-const STATUS_OPTIONS = withAll("All statuses", CALL_STATUSES);
+
+// Switched-off areas and statuses stay in the filters: older calls still use them
+const offLabel = (label, isActive) => (isActive ? label : `${label} (off)`);
 
 export default function CallFilters({ filters, onChange }) {
+  const { setup } = useProductSetup();
+  const typeOptions = withAll(
+    "All types",
+    (setup?.areas ?? []).map((area) => ({ value: area.id, label: offLabel(area.name, area.isActive) })),
+  );
+  const statusOptions = withAll(
+    "All statuses",
+    (setup?.statuses ?? []).map((status) => ({ value: status.key, label: offLabel(status.label, status.isActive) })),
+  );
+
   return (
     <div className="rounded-2xl border border-border bg-surface p-2 shadow-sm">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
@@ -26,9 +38,24 @@ export default function CallFilters({ filters, onChange }) {
         </label>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:items-center lg:border-l lg:border-border lg:pl-2">
-          <FilterSelect label="Direction" value={filters.direction} options={DIRECTION_OPTIONS} onChange={(value) => onChange("direction", value)} />
-          <FilterSelect label="Type" value={filters.area} options={TYPE_OPTIONS} onChange={(value) => onChange("area", value)} />
-          <FilterSelect label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(value) => onChange("status", value)} />
+          <FilterSelect
+            label="Direction"
+            value={filters.direction}
+            options={DIRECTION_OPTIONS}
+            onChange={(value) => onChange("direction", value)}
+          />
+          <FilterSelect
+            label="Type"
+            value={filters.area}
+            options={typeOptions}
+            onChange={(value) => onChange("area", value)}
+          />
+          <FilterSelect
+            label="Status"
+            value={filters.status}
+            options={statusOptions}
+            onChange={(value) => onChange("status", value)}
+          />
           <FilterSelect
             label="Date"
             icon={CalendarDays}
@@ -56,9 +83,20 @@ function CustomDateRange({ fromDate, toDate, onChange }) {
       <p className="text-xs font-semibold uppercase tracking-wider text-muted">Custom range</p>
 
       <div className="flex flex-1 flex-wrap items-center gap-2">
-        <DateInput label="From" value={fromDate} max={toDate || today} onChange={(value) => onChange("fromDate", value)} />
+        <DateInput
+          label="From"
+          value={fromDate}
+          max={toDate || today}
+          onChange={(value) => onChange("fromDate", value)}
+        />
         <ArrowRight className="hidden size-4 text-muted sm:block" />
-        <DateInput label="To" value={toDate} min={fromDate} max={today} onChange={(value) => onChange("toDate", value)} />
+        <DateInput
+          label="To"
+          value={toDate}
+          min={fromDate}
+          max={today}
+          onChange={(value) => onChange("toDate", value)}
+        />
 
         {(fromDate || toDate) && (
           <button
@@ -99,7 +137,9 @@ function DateInput({ label, value, min, max, onChange }) {
 function FilterSelect({ label, icon: Icon, value, options, onChange }) {
   return (
     <div className="relative">
-      {Icon && <Icon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-accent-text" />}
+      {Icon && (
+        <Icon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-accent-text" />
+      )}
       <select
         aria-label={label}
         value={value}

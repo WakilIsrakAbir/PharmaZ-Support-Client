@@ -3,6 +3,8 @@ import { Moon, Sun, Zap } from "lucide-react";
 export const THEME_STORAGE_KEYS = {
   mode: "support-tool:theme-mode",
   accent: "support-tool:theme-accent",
+  // The product's own colour, used until the person picks an accent themselves
+  productAccent: "support-tool:product-accent",
 };
 
 export const DEFAULT_MODE = "dark";

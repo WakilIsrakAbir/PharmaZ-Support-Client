@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, PhoneOff, RotateCw, SearchX } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
-import { useCalls } from "@/hooks/useCalls";
+import { usePagedList } from "@/hooks/usePagedList";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { EMPTY_FILTERS, hasActiveFilters, toCallsQuery } from "@/lib/call-filters";
 import CallDetailsDialog from "./CallDetailsDialog";
@@ -22,9 +22,14 @@ export default function CallLogs() {
 
   // Wait until the agent stops typing before searching
   const search = useDebouncedValue(filters.search);
-  const { calls, meta, error, isLoading, reload, replaceCall } = useCalls(
-    toCallsQuery({ ...filters, search }, page, pageSize),
-  );
+  const {
+    items: calls,
+    meta,
+    error,
+    isLoading,
+    reload,
+    replaceItem: replaceCall,
+  } = usePagedList("/calls", toCallsQuery({ ...filters, search }, page, pageSize));
 
   const hasFilters = hasActiveFilters(filters);
 

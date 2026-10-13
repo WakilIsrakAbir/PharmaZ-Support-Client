@@ -1,19 +1,40 @@
-import { PROBLEM_AREAS } from "@/config/call-log";
+import { areaIcon } from "@/config/area-icons";
 import { cn } from "@/lib/utils";
 
-export default function ProblemAreaPicker({ value, onChange }) {
+const GRID = "grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5";
+
+/** The product's problem areas as cards. `areas` is null while the setup is loading. */
+export default function ProblemAreaPicker({ areas, value, onChange }) {
+  if (!areas) {
+    return (
+      <div className={GRID} aria-hidden="true">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div key={index} className="h-21 animate-pulse rounded-xl bg-elevated" />
+        ))}
+      </div>
+    );
+  }
+
+  if (areas.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-border px-4 py-5 text-center text-sm text-muted">
+        No problem areas are set up yet. A product admin can add them under Settings → Problem areas.
+      </p>
+    );
+  }
+
   return (
-    <div role="group" aria-label="Problem area" className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5">
-      {PROBLEM_AREAS.map((area) => {
-        const Icon = area.icon;
-        const isActive = value === area.value;
+    <div role="group" aria-label="Problem area" className={GRID}>
+      {areas.map((area) => {
+        const Icon = areaIcon(area.icon);
+        const isActive = value === area.id;
 
         return (
           <button
-            key={area.value}
+            key={area.id}
             type="button"
             aria-pressed={isActive}
-            onClick={() => onChange(area.value)}
+            onClick={() => onChange(area.id)}
             className={cn(
               "flex cursor-pointer flex-col items-start gap-2.5 rounded-xl border p-3 text-left transition-all duration-200",
               isActive
@@ -29,7 +50,7 @@ export default function ProblemAreaPicker({ value, onChange }) {
             >
               <Icon className="size-4" />
             </span>
-            <span className="text-[13px] font-semibold leading-tight">{area.label}</span>
+            <span className="text-[13px] font-semibold leading-tight">{area.name}</span>
           </button>
         );
       })}

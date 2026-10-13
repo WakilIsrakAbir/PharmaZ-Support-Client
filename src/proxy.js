@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AUTH_PAGES, HOME_PATH } from "@/config/routes";
+import { AUTH_PAGES } from "@/config/routes";
 
 /**
  * Sends logged-out visitors to /login, and logged-in users away from the auth pages.
@@ -20,7 +20,8 @@ export function proxy(request) {
   }
 
   if (isLoggedIn && isAuthPage) {
-    return NextResponse.redirect(new URL(HOME_PATH, request.url));
+    // "/" sends each person on to their own home page
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

@@ -20,11 +20,7 @@ export const metadata = {
     template: "%s | Demo Support Tool",
   },
   description: "Demo Support Tool",
-  icons: {
-    icon: "/icon.png?v=2",
-    shortcut: "/icon.png?v=2",
-    apple: "/icon.png?v=2",
-  },
+  // The icon comes from src/app/icon.png, which Next.js links automatically
 };
 
 export default function RootLayout({ children }) {

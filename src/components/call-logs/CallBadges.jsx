@@ -1,19 +1,32 @@
-import { CALL_DIRECTIONS, CALL_STATUSES, findOption } from "@/config/call-log";
+import { CALL_DIRECTIONS, findOption } from "@/config/call-log";
+import { optionColor } from "@/config/option-colors";
+import { useProductSetup } from "@/hooks/useProductSetup";
+import { findByKey } from "@/lib/product-setup";
 import { cn } from "@/lib/utils";
 
 export function StatusBadge({ status }) {
-  const option = findOption(CALL_STATUSES, status);
-  if (!option) return <Dash />;
+  const { setup } = useProductSetup();
+  return <OptionBadge option={findByKey(setup?.statuses, status)} value={status} />;
+}
+
+export function PriorityBadge({ priority }) {
+  const { setup } = useProductSetup();
+  return <OptionBadge option={findByKey(setup?.priorities, priority)} value={priority} />;
+}
+
+/** A status or priority in its colour. A key the setup doesn't know is shown as it is. */
+function OptionBadge({ option, value }) {
+  if (!value) return <Dash />;
 
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1",
-        option.className,
+        optionColor(option?.color).badge,
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {option.label}
+      {option?.label ?? value}
     </span>
   );
 }

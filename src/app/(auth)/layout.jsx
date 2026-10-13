@@ -1,7 +1,7 @@
 import BrandPanel from "@/components/auth/BrandPanel";
-import Logo from "@/components/navbar/Logo";
+import Logo from "@/components/ui/Logo";
 
-// Login and register: brand panel on the left, form on the right. No navbar.
+// Login and password reset: brand panel on the left, form on the right. No sidebar.
 export default function AuthLayout({ children }) {
   return (
     <div className="grid min-h-screen flex-1 lg:grid-cols-2">

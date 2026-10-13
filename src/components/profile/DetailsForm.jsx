@@ -6,8 +6,8 @@ import FormAlert from "@/components/auth/FormAlert";
 import SubmitButton from "@/components/auth/SubmitButton";
 import { Field, inputClass } from "@/components/ui/FormControls";
 import FormSection from "@/components/ui/FormSection";
-import { ROLES } from "@/config/roles";
-import { setCurrentUser } from "@/hooks/useCurrentUser";
+import { roleOf } from "@/config/roles";
+import { updateCurrentAccount } from "@/hooks/useCurrentUser";
 import { useForm } from "@/hooks/useForm";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export default function DetailsForm({ user }) {
     validate,
     onSubmit: async (formValues) => {
       const { data } = await api("/auth/me", { method: "PATCH", body: formValues });
-      setCurrentUser(data); // the navbar picks up the new name too
+      updateCurrentAccount(data); // the sidebar picks up the new name too
       reset(toFormValues(data)); // the server trims and lowercases, so show what it stored
       setIsSaved(true);
     },
@@ -75,7 +75,7 @@ export default function DetailsForm({ user }) {
       <FormSection
         icon={IdCard}
         title="Your details"
-        subtitle="How you appear on the calls you log and the audits you show up in."
+        subtitle="How you appear on the calls you log."
         footer={footer}
       >
         <FormAlert message={formError} />
@@ -111,7 +111,7 @@ export default function DetailsForm({ user }) {
             onChange={handleChange}
             error={errors.phone}
           />
-          <TextField id="role" label="Role" help="Set by an administrator." value={ROLES[user.role].label} disabled />
+          <TextField id="role" label="Role" help="Set by an administrator." value={roleOf(user).label} disabled />
         </div>
       </FormSection>
     </form>

@@ -1,13 +1,38 @@
 import {
-  ClipboardCheck,
+  Boxes,
   Gauge,
   LayoutDashboard,
+  LayoutGrid,
   PhoneCall,
   ScrollText,
-  ShieldCheck,
+  SlidersHorizontal,
+  Tags,
+  TextCursorInput,
   Users,
+  UsersRound,
 } from "lucide-react";
+import { canManageProduct } from "./roles";
 
+/** The super admin's console, above every product. */
+const SUPER_ADMIN_GROUP = {
+  label: "Super admin",
+  items: [
+    {
+      label: "All products",
+      href: "/admin/products",
+      description: "Create products and choose their admins",
+      icon: Boxes,
+    },
+    {
+      label: "All accounts",
+      href: "/admin/users",
+      description: "Everyone, in every product",
+      icon: UsersRound,
+    },
+  ],
+};
+
+/** The pages inside a product. */
 export const NAV_GROUPS = [
   {
     label: "Overview",
@@ -44,24 +69,8 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    label: "Audit",
-    items: [
-      {
-        label: "QA",
-        href: "/audit/qa",
-        description: "Quality assurance reviews",
-        icon: ShieldCheck,
-      },
-      {
-        label: "QC",
-        href: "/audit/qc",
-        description: "Quality control checks",
-        icon: ClipboardCheck,
-      },
-    ],
-  },
-  {
     label: "Management",
+    adminOnly: true,
     items: [
       {
         label: "Users",
@@ -71,7 +80,47 @@ export const NAV_GROUPS = [
       },
     ],
   },
+  {
+    label: "Settings",
+    adminOnly: true,
+    items: [
+      {
+        label: "General",
+        href: "/settings/general",
+        description: "Product name and colour",
+        icon: SlidersHorizontal,
+      },
+      {
+        label: "Problem areas",
+        href: "/settings/problem-areas",
+        description: "Areas and issues on the call form",
+        icon: LayoutGrid,
+      },
+      {
+        label: "Statuses & priorities",
+        href: "/settings/statuses",
+        description: "Options for logging and updating calls",
+        icon: Tags,
+      },
+      {
+        label: "Form fields",
+        href: "/settings/form-fields",
+        description: "Extra questions on the call form",
+        icon: TextCursorInput,
+      },
+    ],
+  },
 ];
+
+/**
+ * The groups this user may see. Management and Settings are for product admins; the
+ * super admin also gets their console, plus the pages of whichever product is open.
+ */
+export function getNavGroups(user) {
+  const productGroups = NAV_GROUPS.filter((group) => !group.adminOnly || canManageProduct(user));
+  if (!user?.isSuperAdmin) return productGroups;
+  return [SUPER_ADMIN_GROUP, ...(user.product ? productGroups : [])];
+}
 
 /** True when `pathname` is `href` itself or a page nested under it. */
 export function isActivePath(pathname, href) {

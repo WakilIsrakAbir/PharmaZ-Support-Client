@@ -2,20 +2,16 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { CircleCheck, Flag, LoaderCircle, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
+import { CircleCheck, Flag, ListChecks, LoaderCircle, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
 import FormAlert from "@/components/auth/FormAlert";
 import { Field, Select, inputClass } from "@/components/ui/FormControls";
 import FormSection from "@/components/ui/FormSection";
-import {
-  CALL_DIRECTIONS,
-  CALL_STATUSES,
-  DEFAULT_STATUS,
-  OTHER_ISSUE,
-  PRIORITIES,
-  PROBLEM_AREAS,
-} from "@/config/call-log";
+import { CALL_DIRECTIONS, OTHER_ISSUE } from "@/config/call-log";
+import { useProductSetup } from "@/hooks/useProductSetup";
 import { api } from "@/lib/api";
+import { defaultKey } from "@/lib/product-setup";
 import CallTimeBadge from "./CallTimeBadge";
+import CustomFieldInputs from "./CustomFieldInputs";
 import ProblemAreaPicker from "./ProblemAreaPicker";
 import SegmentedControl from "./SegmentedControl";
 
@@ -25,20 +21,21 @@ const EMPTY_FORM = {
   transactionNo: "",
   area: "",
   issue: "",
-  priority: "normal",
+  priority: "", // empty means the product's default
   direction: "inbound",
-  status: DEFAULT_STATUS,
+  status: "", // empty means the product's default
   duration: "",
   calledAt: "", // empty means "now"
   outcome: "",
   comments: "",
+  customFields: {}, // answers to the product's extra fields, by key
 };
 
 // Bangladeshi mobile numbers: 01XXXXXXXXX, optionally starting with +88 or 88
 const MOBILE_PATTERN = /^(\+?88)?01[3-9]\d{8}$/;
 const DURATION_PATTERN = /^\d{1,3}:[0-5]\d$/;
 
-function validate(form) {
+function validate(form, fields) {
   const errors = {};
   const mobile = form.mobile.replace(/[\s-]/g, "");
 
@@ -52,16 +49,26 @@ function validate(form) {
     errors.duration = "Use minutes and seconds, like 03:45.";
   }
 
+  for (const field of fields) {
+    if (field.required && !form.customFields[field.key]?.trim()) {
+      errors[`customFields.${field.key}`] = `${field.label} is required.`;
+    }
+  }
+
   return errors;
 }
 
 /** The form's values in the shape POST /api/calls expects. */
-function toRequestBody({ duration, calledAt, area, ...form }) {
+function toRequestBody({ duration, calledAt, area, status, priority, customFields, ...form }) {
   const [minutes, seconds] = duration.split(":").map(Number);
 
   return {
     ...form,
     area: area || undefined,
+    // Left empty, the server uses the product's defaults
+    status: status || undefined,
+    priority: priority || undefined,
+    customFields: Object.fromEntries(Object.entries(customFields).filter(([, value]) => value.trim())),
     durationSeconds: duration ? minutes * 60 + seconds : undefined,
     // The picker gives local time ("2026-10-13T15:20"). Left empty, the server uses "now".
     calledAt: calledAt ? new Date(calledAt).toISOString() : undefined,
@@ -75,11 +82,26 @@ export default function LogCallForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loggedCall, setLoggedCall] = useState(null);
   const mobileRef = useRef(null);
+  const { setup, error: setupError } = useProductSetup();
 
-  const selectedArea = PROBLEM_AREAS.find((area) => area.value === form.area);
+  // New calls can only use what's switched on
+  const areas = setup?.areas.filter((area) => area.isActive) ?? null;
+  const priorities = setup?.priorities.filter((option) => option.isActive) ?? [];
+  const statuses = setup?.statuses.filter((option) => option.isActive) ?? [];
+  const fields = setup?.customFields.filter((field) => field.isActive) ?? [];
+  const selectedArea = areas?.find((area) => area.id === form.area);
+  const issues = selectedArea
+    ? [...selectedArea.issues.filter((issue) => issue.isActive).map((issue) => issue.label), OTHER_ISSUE]
+    : [];
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }));
+    if (errors[name]) setErrors((current) => ({ ...current, [name]: undefined }));
+  }
+
+  function updateAnswer(key, value) {
+    setForm((current) => ({ ...current, customFields: { ...current.customFields, [key]: value } }));
+    const name = `customFields.${key}`;
     if (errors[name]) setErrors((current) => ({ ...current, [name]: undefined }));
   }
 
@@ -98,7 +120,7 @@ export default function LogCallForm() {
     event.preventDefault();
     setFormError("");
 
-    const newErrors = validate(form);
+    const newErrors = validate(form, fields);
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       if (newErrors.mobile) mobileRef.current?.focus();
@@ -114,15 +136,16 @@ export default function LogCallForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       // The server calls the duration "durationSeconds"; the form calls it "duration"
-      const { durationSeconds, ...fields } = error.fields ?? {};
-      if (durationSeconds) fields.duration = durationSeconds;
+      const { durationSeconds, ...serverErrors } = error.fields ?? {};
+      if (durationSeconds) serverErrors.duration = durationSeconds;
 
       // Problems with a field that has no error slot (e.g. calledAt) go above the form
-      const hiddenField = Object.keys(fields).find((name) => !(name in EMPTY_FORM));
+      // ("customFields.branch" has its own slot under the Details section)
+      const hiddenField = Object.keys(serverErrors).find((name) => !(name.split(".")[0] in EMPTY_FORM));
 
-      setErrors(fields);
-      if (hiddenField) setFormError(fields[hiddenField]);
-      else if (Object.keys(fields).length === 0) setFormError(error.message);
+      setErrors(serverErrors);
+      if (hiddenField) setFormError(serverErrors[hiddenField]);
+      else if (Object.keys(serverErrors).length === 0) setFormError(error.message);
     }
 
     setIsSubmitting(false);
@@ -130,8 +153,8 @@ export default function LogCallForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
-      {/* Stays under the navbar while scrolling, so "Log call" is always in reach */}
-      <div className="sticky top-16 z-30 -mt-4 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/90 pb-5 pt-4 backdrop-blur-xl">
+      {/* Stays at the top while scrolling (under the phone top bar), so "Log call" is always in reach */}
+      <div className="sticky top-16 z-30 -mt-4 lg:top-0 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/90 pb-5 pt-4 backdrop-blur-xl">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Log a Call</h1>
           <p className="mt-1 text-sm text-muted">Capture the customer and the call details.</p>
@@ -157,7 +180,7 @@ export default function LogCallForm() {
         </div>
       </div>
 
-      <FormAlert message={formError} />
+      <FormAlert message={formError || (setupError && `Couldn't load the product setup: ${setupError}`)} />
 
       {loggedCall && (
         <div
@@ -186,7 +209,13 @@ export default function LogCallForm() {
       <div className="space-y-6">
         <FormSection icon={UserRound} title="Customer" subtitle="Who reached out">
           <div className="grid gap-5 md:grid-cols-3">
-            <Field label="Mobile" htmlFor="mobile" required hint="the only field this form requires" error={errors.mobile}>
+            <Field
+              label="Mobile"
+              htmlFor="mobile"
+              required
+              hint={fields.some((field) => field.required) ? undefined : "the only field this form requires"}
+              error={errors.mobile}
+            >
               <input
                 ref={mobileRef}
                 id="mobile"
@@ -221,11 +250,15 @@ export default function LogCallForm() {
           </div>
         </FormSection>
 
-        <FormSection icon={Flag} title="Problem" subtitle="Which part of PharmaZ247 they need help with">
-          <ProblemAreaPicker value={form.area} onChange={selectArea} />
+        <FormSection
+          icon={Flag}
+          title="Problem"
+          subtitle={`Which part of ${setup?.product.name ?? "the product"} they need help with`}
+        >
+          <ProblemAreaPicker areas={areas} value={form.area} onChange={selectArea} />
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Issue" htmlFor="issue" optional>
+            <Field label="Issue" htmlFor="issue" optional error={errors.issue ?? errors.area}>
               <Select
                 id="issue"
                 value={form.issue}
@@ -234,19 +267,18 @@ export default function LogCallForm() {
                 className="disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="">{selectedArea ? "Choose the issue" : "Pick a problem area first"}</option>
-                {selectedArea &&
-                  [...selectedArea.issues, OTHER_ISSUE].map((issue) => (
-                    <option key={issue} value={issue}>
-                      {issue}
-                    </option>
-                  ))}
+                {issues.map((issue) => (
+                  <option key={issue} value={issue}>
+                    {issue}
+                  </option>
+                ))}
               </Select>
             </Field>
-            <Field label="Priority">
+            <Field label="Priority" error={errors.priority}>
               <SegmentedControl
                 label="Priority"
-                options={PRIORITIES}
-                value={form.priority}
+                options={priorities.map((option) => ({ value: option.key, label: option.label }))}
+                value={form.priority || defaultKey(priorities)}
                 onChange={(value) => updateField("priority", value)}
               />
             </Field>
@@ -268,10 +300,14 @@ export default function LogCallForm() {
                 onChange={(value) => updateField("direction", value)}
               />
             </Field>
-            <Field label="Status" htmlFor="status">
-              <Select id="status" value={form.status} onChange={(event) => updateField("status", event.target.value)}>
-                {CALL_STATUSES.map((status) => (
-                  <option key={status.value} value={status.value}>
+            <Field label="Status" htmlFor="status" error={errors.status}>
+              <Select
+                id="status"
+                value={form.status || defaultKey(statuses)}
+                onChange={(event) => updateField("status", event.target.value)}
+              >
+                {statuses.map((status) => (
+                  <option key={status.key} value={status.key}>
                     {status.label}
                   </option>
                 ))}
@@ -312,6 +348,12 @@ export default function LogCallForm() {
             />
           </Field>
         </FormSection>
+
+        {fields.length > 0 && (
+          <FormSection icon={ListChecks} title="Details" subtitle={`What ${setup.product.name} also asks for`}>
+            <CustomFieldInputs fields={fields} values={form.customFields} errors={errors} onChange={updateAnswer} />
+          </FormSection>
+        )}
       </div>
     </form>
   );

@@ -22,8 +22,3 @@ function getScrollProgress() {
 export function useScrollProgress() {
   return useSyncExternalStore(subscribe, getScrollProgress, () => 0);
 }
-
-/** True once the page has been scrolled past `offset` pixels. */
-export function useHasScrolled(offset = 8) {
-  return useSyncExternalStore(subscribe, () => window.scrollY > offset, () => false);
-}

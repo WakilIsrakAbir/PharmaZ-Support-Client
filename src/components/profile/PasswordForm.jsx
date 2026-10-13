@@ -7,7 +7,7 @@ import PasswordField from "@/components/auth/PasswordField";
 import PasswordStrength from "@/components/auth/PasswordStrength";
 import SubmitButton from "@/components/auth/SubmitButton";
 import FormSection from "@/components/ui/FormSection";
-import { setCurrentUser } from "@/hooks/useCurrentUser";
+import { updateCurrentAccount } from "@/hooks/useCurrentUser";
 import { useForm } from "@/hooks/useForm";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -31,7 +31,7 @@ export default function PasswordForm({ passwordChangedAt }) {
     validate,
     onSubmit: async ({ currentPassword, newPassword }) => {
       const { data } = await api("/auth/me/password", { method: "PATCH", body: { currentPassword, newPassword } });
-      setCurrentUser(data);
+      updateCurrentAccount(data);
       reset();
       setIsChanged(true);
     },

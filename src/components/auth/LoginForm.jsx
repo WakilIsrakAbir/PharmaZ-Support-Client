@@ -18,8 +18,8 @@ function validate({ email, password }) {
 }
 
 async function logIn(values) {
-  await api("/auth/login", { method: "POST", body: values });
-  await goTo(getRedirectPath());
+  const { data: user } = await api("/auth/login", { method: "POST", body: values });
+  await goTo(getRedirectPath(user));
 }
 
 export default function LoginForm() {

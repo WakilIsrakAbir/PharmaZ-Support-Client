@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
+import HomeRedirect from "@/components/sidebar/HomeRedirect";
 
-// The dashboard is the app's home page.
+// "/" has no page of its own: everyone goes on to their home
 export default function Home() {
-  redirect("/overview/dashboard");
+  return <HomeRedirect />;
 }

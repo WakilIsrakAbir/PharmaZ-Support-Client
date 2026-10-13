@@ -1,9 +1,8 @@
 "use client";
 
-import { HOME_PATH } from "@/config/routes";
 import { useForm } from "@/hooks/useForm";
 import { api } from "@/lib/api";
-import { goTo } from "@/lib/auth";
+import { goTo, homePathFor } from "@/lib/auth";
 import FormAlert from "./FormAlert";
 import PasswordField from "./PasswordField";
 import PasswordStrength from "./PasswordStrength";
@@ -21,8 +20,8 @@ async function resetPassword({ password }) {
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
 
   // The server logs the user in, so go straight to the app
-  await api("/auth/reset-password", { method: "POST", body: { token, password } });
-  await goTo(HOME_PATH);
+  const { data: user } = await api("/auth/reset-password", { method: "POST", body: { token, password } });
+  await goTo(homePathFor(user));
 }
 
 export default function ResetPasswordForm() {

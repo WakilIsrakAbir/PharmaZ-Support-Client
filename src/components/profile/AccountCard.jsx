@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { Check, Copy, ShieldCheck } from "lucide-react";
-import { ROLES } from "@/config/roles";
+import { roleOf } from "@/config/roles";
 import { formatDateTime, formatMonthYear, getInitials } from "@/lib/format";
 
 /** The coloured card at the top of the profile: who you are and facts you can't edit. */
 export default function AccountCard({ user }) {
-  const role = ROLES[user.role];
+  const role = roleOf(user);
 
   return (
     <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-accent-strong to-accent text-accent-foreground shadow-xl shadow-accent/20">
@@ -45,7 +45,8 @@ export default function AccountCard({ user }) {
 
       <p className="relative flex items-start gap-2.5 border-t border-white/15 px-6 py-4 text-sm sm:px-8">
         <ShieldCheck className="mt-0.5 size-4 shrink-0" />
-        {role.description} Your access level is set by an administrator.
+        {role.description}{" "}
+        {user.isSuperAdmin ? "This is the platform owner's account." : "Your access level is set by an administrator."}
       </p>
     </section>
   );

@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 /*
+ * `collapsed:` styles the desktop sidebar (marked .sidebar-desktop) while it is folded
+ * to icons. The flag lives on <html> so it is set before the first paint (ThemeScript).
+ */
+@custom-variant collapsed (&:where([data-sidebar="collapsed"] .sidebar-desktop, [data-sidebar="collapsed"] .sidebar-desktop *));
+
+/*
  * Theme tokens
  *
  * <html data-theme="light | dark | system" data-accent="emerald | teal | ...">
@@ -23,6 +29,9 @@
 
   /* Darker shade for filled buttons, and a shade that stays readable as text */
   --accent-strong: color-mix(in oklab, var(--accent) 78%, black);
+
+  /* The sidebar is the accent colour itself (a touch deeper so white text stays readable) */
+  --sidebar: color-mix(in oklab, var(--accent) 85%, black);
   --accent-text: light-dark(
     color-mix(in oklab, var(--accent) 72%, black),
     color-mix(in oklab, var(--accent) 78%, white)
@@ -81,6 +90,7 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-text: var(--accent-text);
   --color-accent-foreground: var(--accent-foreground);
+  --color-sidebar: var(--sidebar);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

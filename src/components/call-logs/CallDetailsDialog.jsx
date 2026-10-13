@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PhoneCall, X } from "lucide-react";
 import { CALL_DIRECTIONS, findOption } from "@/config/call-log";
+import { canManageProduct } from "@/config/roles";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import CallSummary from "./CallSummary";
 import EditCallForm from "./EditCallForm";
@@ -31,7 +32,7 @@ export default function CallDetailsDialog({ call, onClose, onUpdated }) {
     onUpdated(updatedCall);
   }
 
-  const canEdit = call && user && (user.role === "admin" || call.createdBy?.id === user.id);
+  const canEdit = call && user && (canManageProduct(user) || call.createdBy?.id === user.id);
   const direction = call && findOption(CALL_DIRECTIONS, call.direction);
 
   return (

@@ -2,11 +2,11 @@ import { ClipboardCheck, Headset, PhoneCall, TrendingUp } from "lucide-react";
 
 const highlights = [
   { icon: PhoneCall, title: "Log calls in seconds", text: "Only a mobile number is required to save a call." },
-  { icon: ClipboardCheck, title: "Every PharmaZ247 module", text: "File issues under POS, Inventory, Purchase and more." },
-  { icon: TrendingUp, title: "Quality you can measure", text: "QA, QC and performance in one place." },
+  { icon: ClipboardCheck, title: "Set up for each product", text: "Every product has its own problem areas and issues." },
+  { icon: TrendingUp, title: "See how support is going", text: "A live dashboard for every product." },
 ];
 
-/** The coloured left half of the login and register pages. */
+/** The coloured left half of the login and password pages. */
 export default function BrandPanel() {
   return (
     <aside className="relative hidden overflow-hidden bg-linear-to-br from-accent-strong to-accent p-12 text-accent-foreground lg:flex lg:flex-col">
@@ -29,7 +29,7 @@ export default function BrandPanel() {
       <div className="relative my-auto max-w-md py-12">
         <h2 className="text-4xl font-bold leading-tight">Support every pharmacy, one call at a time.</h2>
         <p className="mt-4 text-base opacity-85">
-          The workspace the PharmaZ247 support team uses to log calls, track issues and keep quality high.
+          The workspace support teams use to log calls, track issues and keep quality high, one product at a time.
         </p>
 
         <ul className="mt-10 space-y-5">

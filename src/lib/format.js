@@ -43,3 +43,31 @@ export function formatDuration(seconds) {
   const rest = String(seconds % 60).padStart(2, "0");
   return minutes ? `${minutes}m ${rest}s` : `${seconds}s`;
 }
+
+const relativeFormat = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+const UNITS = [
+  ["year", 31_536_000],
+  ["month", 2_592_000],
+  ["week", 604_800],
+  ["day", 86_400],
+  ["hour", 3_600],
+  ["minute", 60],
+];
+
+/** "3 hours ago", "yesterday", "just now". Only call this in the browser: it reads the clock. */
+export function formatRelative(value) {
+  const seconds = (new Date(value).getTime() - Date.now()) / 1000;
+
+  for (const [unit, size] of UNITS) {
+    if (Math.abs(seconds) >= size) return relativeFormat.format(Math.round(seconds / size), unit);
+  }
+  return "just now";
+}
+
+/**
+ * "?tz=-360": the browser's Date.getTimezoneOffset(), so the API counts "today" in the
+ * viewer's own day. 0 (UTC) while rendering on the server.
+ */
+export function timezoneQuery() {
+  return `?tz=${typeof window === "undefined" ? 0 : new Date().getTimezoneOffset()}`;
+}

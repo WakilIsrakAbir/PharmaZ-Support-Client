@@ -14,9 +14,13 @@ export function useForm({ initialValues, validate = () => ({}), onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(event) {
-    const { name, value } = event.target;
+    setValue(event.target.name, event.target.value);
+  }
+
+  /** For values that aren't a plain input, e.g. setValue("customFields", {...}). */
+  function setValue(name, value, errorName = name) {
     setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: undefined }));
+    setErrors((current) => ({ ...current, [errorName]: undefined }));
   }
 
   function reset(newValues = initialValues) {
@@ -41,8 +45,9 @@ export function useForm({ initialValues, validate = () => ({}), onSubmit }) {
       await onSubmit(values);
     } catch (error) {
       const fields = error.fields ?? {};
-      // A problem with something that isn't a visible field (e.g. a reset link) goes on top
-      const hiddenField = Object.keys(fields).find((name) => !(name in values));
+      // A problem with something that isn't a visible field (e.g. a reset link) goes on top.
+      // "customFields.branch" belongs to the customFields value.
+      const hiddenField = Object.keys(fields).find((name) => !(name.split(".")[0] in values));
 
       setErrors(fields);
       if (hiddenField) setFormError(fields[hiddenField]);
@@ -52,5 +57,5 @@ export function useForm({ initialValues, validate = () => ({}), onSubmit }) {
     setIsSubmitting(false);
   }
 
-  return { values, errors, formError, isSubmitting, handleChange, handleSubmit, reset };
+  return { values, errors, formError, isSubmitting, handleChange, setValue, handleSubmit, reset };
 }

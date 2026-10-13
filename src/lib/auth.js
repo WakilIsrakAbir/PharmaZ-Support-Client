@@ -1,15 +1,21 @@
-import { HOME_PATH } from "@/config/routes";
+import { HOME_PATH, SUPER_ADMIN_HOME } from "@/config/routes";
 import { api } from "./api";
 
 /**
  * Where to go after logging in: the page the user originally asked for
- * (saved in ?next= by proxy.js), or the dashboard.
+ * (saved in ?next= by proxy.js), or their home: all products for the super admin,
+ * the dashboard for everyone else.
  */
-export function getRedirectPath() {
+export function getRedirectPath(user) {
   const next = new URLSearchParams(window.location.search).get("next");
 
   // Only allow paths on this site, never "//other-site.com"
-  return next?.startsWith("/") && !next.startsWith("//") ? next : HOME_PATH;
+  if (next?.startsWith("/") && !next.startsWith("//")) return next;
+  return homePathFor(user);
+}
+
+export function homePathFor(user) {
+  return user?.isSuperAdmin ? SUPER_ADMIN_HOME : HOME_PATH;
 }
 
 /**

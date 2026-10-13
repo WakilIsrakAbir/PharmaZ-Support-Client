@@ -1,13 +1,17 @@
-import { MessageSquareQuote, Pencil, Target } from "lucide-react";
-import { PRIORITIES, PROBLEM_AREAS, findOption } from "@/config/call-log";
+import { ListChecks, MessageSquareQuote, Pencil, Target } from "lucide-react";
+import { useProductSetup } from "@/hooks/useProductSetup";
 import { formatDate, formatDuration, formatTime } from "@/lib/format";
+import { formatAnswer } from "@/lib/product-setup";
 import { cn } from "@/lib/utils";
-import { DialogBody, DialogFooter, secondaryButtonClass } from "./DialogParts";
-import { Dash, DirectionLabel, StatusBadge } from "./CallBadges";
+import { DialogBody, DialogFooter, secondaryButtonClass } from "@/components/ui/DialogParts";
+import { Dash, DirectionLabel, PriorityBadge, StatusBadge } from "./CallBadges";
 
 /** The read-only view of a call inside the details dialog. */
 export default function CallSummary({ call, canEdit, onEdit, onClose }) {
-  const area = findOption(PROBLEM_AREAS, call.area);
+  const { setup } = useProductSetup();
+  const answers = call.customFields ?? {};
+  // Every field this call has an answer for, including fields switched off since
+  const extraFields = (setup?.customFields ?? []).filter((field) => answers[field.key] !== undefined);
 
   return (
     <>
@@ -34,9 +38,10 @@ export default function CallSummary({ call, canEdit, onEdit, onClose }) {
         <dl className="grid gap-x-8 sm:grid-cols-2">
           <Detail label="Support person">{call.createdBy?.name}</Detail>
           <Detail label="Problem type">
-            {area && (
+            {/* The area's name as it was when the call was logged */}
+            {call.areaName && (
               <>
-                {area.label}
+                {call.areaName}
                 {call.issue && <span className="mt-0.5 block text-xs font-normal text-muted">{call.issue}</span>}
               </>
             )}
@@ -50,8 +55,24 @@ export default function CallSummary({ call, canEdit, onEdit, onClose }) {
           <Detail label="Transaction no." mono>
             {call.transactionNo}
           </Detail>
-          <Detail label="Priority">{findOption(PRIORITIES, call.priority)?.label}</Detail>
+          <Detail label="Priority">{call.priority && <PriorityBadge priority={call.priority} />}</Detail>
         </dl>
+
+        {extraFields.length > 0 && (
+          <section>
+            <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold">
+              <ListChecks className="size-4 text-accent-text" />
+              Details
+            </h3>
+            <dl className="grid gap-x-8 sm:grid-cols-2">
+              {extraFields.map((field) => (
+                <Detail key={field.key} label={field.label} mono={field.type === "number"}>
+                  {formatAnswer(field, answers[field.key])}
+                </Detail>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <Note icon={Target} title="Outcome" text={call.outcome} emptyText="No outcome recorded." />
         <Note icon={MessageSquareQuote} title="Comments" text={call.comments} emptyText="No comments recorded." />
