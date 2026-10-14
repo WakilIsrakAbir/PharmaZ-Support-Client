@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/ui/Spinner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { homePathFor } from "@/lib/auth";
 
@@ -14,5 +15,5 @@ export default function HomeRedirect() {
     if (user) router.replace(homePathFor(user));
   }, [user, router]);
 
-  return <div className="page-container py-8" aria-busy="true" />;
+  return <Spinner label="Opening your home page…" className="py-32" />;
 }

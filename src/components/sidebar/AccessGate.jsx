@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Hourglass, KeyRound, LayoutGrid, LogOut } from "lucide-react";
 import AuthHeading from "@/components/auth/AuthHeading";
 import SetPasswordForm from "@/components/auth/SetPasswordForm";
-import Logo from "@/components/ui/Logo";
+import CenteredScreen from "@/components/ui/CenteredScreen";
 import { SUPER_ADMIN_HOME } from "@/config/routes";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { logOut } from "@/lib/auth";
@@ -25,7 +25,7 @@ export default function AccessGate({ children }) {
 
   if (user.mustChangePassword) {
     return (
-      <Screen>
+      <CenteredScreen>
         <div className="mb-6 grid size-12 place-items-center rounded-2xl bg-accent/10 text-accent-text">
           <KeyRound className="size-6" />
         </div>
@@ -35,7 +35,7 @@ export default function AccessGate({ children }) {
         />
         <SetPasswordForm />
         <SignOut />
-      </Screen>
+      </CenteredScreen>
     );
   }
 
@@ -65,18 +65,9 @@ export default function AccessGate({ children }) {
   );
 }
 
-function Screen({ children }) {
-  return (
-    <main className="flex min-h-screen flex-col px-6 py-10 sm:px-10">
-      <Logo />
-      <div className="mx-auto my-auto w-full max-w-md py-10">{children}</div>
-    </main>
-  );
-}
-
 function Message({ icon: Icon, title, children }) {
   return (
-    <Screen>
+    <CenteredScreen>
       <div className="text-center">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-accent/10 text-accent-text">
           <Icon className="size-7" />
@@ -84,7 +75,7 @@ function Message({ icon: Icon, title, children }) {
         <h1 className="mt-5 text-2xl font-bold tracking-tight">{title}</h1>
         <div className="mt-2 text-sm text-muted">{children}</div>
       </div>
-    </Screen>
+    </CenteredScreen>
   );
 }
 

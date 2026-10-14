@@ -27,8 +27,9 @@ export function StatusesView() {
             noun="status"
             icon={Tags}
             title="Call statuses"
-            subtitle="Where a call stands, shown as a coloured badge in the logs"
+            subtitle="Where a call stands. Ticked “Closes call” ones count as resolved on Performance."
             saved={setup.statuses}
+            closable
           />
           <OptionListEditor
             name="priorities"

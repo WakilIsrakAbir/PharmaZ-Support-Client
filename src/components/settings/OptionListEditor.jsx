@@ -12,13 +12,17 @@ import ColorPicker from "./ColorPicker";
 import { IconButton, MoveButtons, SaveBar, SwitchedOffList, listError, rowError } from "./ListParts";
 import { useDraftList } from "./useDraftList";
 
-const toDraft = ({ key, label, color, isDefault, isActive }) => ({ key, label, color, isDefault, isActive });
+const toOption = ({ key, label, color, isDefault, isActive }) => ({ key, label, color, isDefault, isActive });
+// Statuses also say whether they close a call
+const toStatus = (status) => ({ ...toOption(status), isClosed: Boolean(status.isClosed) });
 
 /**
  * Edits a status or priority list: names, colours, order, the default, and switching
  * options off. `name` is the list's name in the API ("statuses" or "priorities").
+ * With `closable`, each option can also be marked as closing the call.
  */
-export default function OptionListEditor({ name, noun, icon, title, subtitle, saved }) {
+export default function OptionListEditor({ name, noun, icon, title, subtitle, saved, closable = false }) {
+  const toDraft = closable ? toStatus : toOption;
   const draft = useDraftList(saved.map(toDraft));
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
@@ -177,6 +181,25 @@ export default function OptionListEditor({ name, noun, icon, title, subtitle, sa
                       />
                       Default
                     </label>
+                    {closable && (
+                      <label
+                        title="Calls with this status count as resolved on the Performance page"
+                        className={cn(
+                          "flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition-colors",
+                          row.isClosed
+                            ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-500"
+                            : "border-border text-muted hover:text-foreground",
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={row.isClosed}
+                          onChange={(event) => edit(row, { isClosed: event.target.checked })}
+                          className="accent-emerald-500"
+                        />
+                        Closes call
+                      </label>
+                    )}
                   </div>
                   <IconButton
                     label={`Switch off ${row.label || noun}`}
@@ -196,7 +219,7 @@ export default function OptionListEditor({ name, noun, icon, title, subtitle, sa
         <button
           type="button"
           onClick={() => {
-            draft.add({ label: "", color: "slate", isDefault: false, isActive: true });
+            draft.add(toDraft({ label: "", color: "slate", isDefault: false, isActive: true }));
             setNotice("");
           }}
           className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2.5 text-sm font-semibold text-muted transition-colors hover:border-accent/50 hover:text-accent-text"

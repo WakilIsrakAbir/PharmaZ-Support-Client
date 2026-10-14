@@ -14,6 +14,8 @@ import {
   Trophy,
 } from "lucide-react";
 import { StatusBadge } from "@/components/call-logs/CallBadges";
+import Bars from "@/components/ui/Bars";
+import Card, { Empty, Placeholder } from "@/components/ui/Card";
 import Notice from "@/components/ui/Notice";
 import { optionColor } from "@/config/option-colors";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -162,32 +164,6 @@ function Tile({ label, value, highlight }) {
   );
 }
 
-function Card({ icon: Icon, title, subtitle, action, className, children }) {
-  return (
-    <section className={cn("flex flex-col rounded-2xl border border-border bg-surface shadow-sm", className)}>
-      <header className="flex items-center gap-3 border-b border-border px-5 py-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent-text">
-          <Icon className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-semibold">{title}</h2>
-          <p className="truncate text-xs text-muted">{subtitle}</p>
-        </div>
-        {action}
-      </header>
-      <div className="flex-1 p-5">{children}</div>
-    </section>
-  );
-}
-
-function Placeholder({ height = "h-40" }) {
-  return <div className={cn("animate-pulse rounded-xl bg-elevated", height)} />;
-}
-
-function Empty({ children }) {
-  return <p className="py-6 text-center text-sm text-muted">{children}</p>;
-}
-
 /** One bar per day. Every few days get a date underneath, so the axis stays readable. */
 function DailyChart({ daily }) {
   const busiest = Math.max(...daily.map((day) => day.count));
@@ -227,25 +203,6 @@ function DailyChart({ daily }) {
   );
 }
 
-function Bars({ rows }) {
-  const max = Math.max(1, ...rows.map((row) => row.count));
-  return (
-    <ul className="space-y-3">
-      {rows.map((row) => (
-        <li key={row.key}>
-          <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-            <span className="min-w-0 truncate">{row.label}</span>
-            <span className="font-semibold tabular-nums">{row.count}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-elevated">
-            <div className={cn("h-full rounded-full", row.barClass)} style={{ width: `${(row.count / max) * 100}%` }} />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function StatusBreakdown({ rows }) {
   const { setup } = useProductSetup();
   if (rows.length === 0) return <Empty>No calls in this period.</Empty>;
@@ -257,7 +214,7 @@ function StatusBreakdown({ rows }) {
         return {
           key: status ?? "none",
           label: option?.label ?? status ?? "No status",
-          count,
+          value: count,
           barClass: optionColor(option?.color).swatch,
         };
       })}
@@ -272,7 +229,7 @@ function AreaBreakdown({ rows }) {
       rows={rows.map(({ area, count }) => ({
         key: area ?? "none",
         label: area ?? "No area picked",
-        count,
+        value: count,
         barClass: area ? "bg-accent" : "bg-slate-400",
       }))}
     />

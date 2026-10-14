@@ -6,6 +6,7 @@ import FormAlert from "@/components/auth/FormAlert";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Notice from "@/components/ui/Notice";
 import Pagination from "@/components/ui/Pagination";
+import Skeleton from "@/components/ui/Skeleton";
 import { ROLES, canManageProduct } from "@/config/roles";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -23,7 +24,7 @@ export default function UsersView() {
   const currentUser = useCurrentUser();
 
   // The API refuses non-admins anyway; this just explains it instead of showing errors
-  if (!currentUser) return <div className="h-96 animate-pulse rounded-2xl bg-elevated" />;
+  if (!currentUser) return <Skeleton className="h-96 rounded-2xl" />;
   if (!canManageProduct(currentUser)) {
     return (
       <Notice icon={LockKeyhole} title="Admins only" text="Ask an administrator if you need to manage users." />
