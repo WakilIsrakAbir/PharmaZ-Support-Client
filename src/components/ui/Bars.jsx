@@ -13,8 +13,9 @@ export default function Bars({ rows, max }) {
     <ul className="space-y-3">
       {rows.map((row) => (
         <li key={row.key}>
-          <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-            <span className="min-w-0 truncate">{row.label}</span>
+          {/* Long labels wrap onto more lines rather than being cut off */}
+          <div className="mb-1 flex items-start justify-between gap-3 text-sm">
+            <span className="min-w-0 wrap-break-word">{row.label}</span>
             <span className="shrink-0 font-semibold tabular-nums">{row.text ?? row.value}</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-elevated">

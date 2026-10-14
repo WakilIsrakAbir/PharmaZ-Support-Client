@@ -31,7 +31,7 @@ export default function MobileSidebar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/95 px-4 sm:px-6 lg:hidden">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
@@ -48,13 +48,14 @@ export default function MobileSidebar() {
       <div className={cn("fixed inset-0 z-50 lg:hidden", !isOpen && "pointer-events-none")} inert={!isOpen}>
         <div
           onClick={close}
-          className={cn("absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300", isOpen ? "opacity-100" : "opacity-0")}
+          // No blur here: fading a full-screen blur in and out is what made the drawer feel slow
+          className={cn("absolute inset-0 bg-black/50 transition-opacity duration-200", isOpen ? "opacity-100" : "opacity-0")}
         />
 
         <aside
           aria-label="Menu"
           className={cn(
-            "absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-sidebar shadow-2xl transition-transform duration-300 ease-out",
+            "absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-sidebar shadow-2xl transition-transform duration-200 ease-out will-change-transform",
             isOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >

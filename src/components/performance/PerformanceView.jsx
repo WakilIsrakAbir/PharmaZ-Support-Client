@@ -66,7 +66,7 @@ export default function PerformanceView() {
           <TeamSummary report={report} />
           <CompareCards agents={report?.agents} />
           {report && (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
               {report.agents.map((agent) => (
                 <AgentCard key={agent.id} agent={agent} />
               ))}

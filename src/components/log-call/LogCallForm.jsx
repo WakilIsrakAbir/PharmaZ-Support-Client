@@ -154,7 +154,7 @@ export default function LogCallForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* Stays at the top while scrolling (under the phone top bar), so "Log call" is always in reach */}
-      <div className="sticky top-16 z-30 -mt-4 lg:top-0 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/90 pb-5 pt-4 backdrop-blur-xl">
+      <div className="sticky top-16 z-30 -mt-4 lg:top-0 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/95 pb-5 pt-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Log a Call</h1>
           <p className="mt-1 text-sm text-muted">Capture the customer and the call details.</p>

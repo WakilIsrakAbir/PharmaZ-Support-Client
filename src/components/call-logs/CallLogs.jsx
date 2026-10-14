@@ -3,8 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, PhoneOff, RotateCw, SearchX } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
+import { canManageProduct } from "@/config/roles";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { usePagedList } from "@/hooks/usePagedList";
+import { api } from "@/lib/api";
+import { formatDateTime } from "@/lib/format";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { EMPTY_FILTERS, hasActiveFilters, toCallsQuery } from "@/lib/call-filters";
 import CallDetailsDialog from "./CallDetailsDialog";
@@ -13,12 +18,16 @@ import CallsTable from "./CallsTable";
 
 const PAGE_SIZES = [10, 20, 50];
 const numberFormat = new Intl.NumberFormat("en-US");
+const NOT_DELETING = { call: null, isWorking: false, error: "" };
 
 export default function CallLogs() {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
   const [openCall, setOpenCall] = useState(null);
+  const [deleting, setDeleting] = useState(NOT_DELETING);
+  // Only admins may delete calls; the API checks this too
+  const canDelete = canManageProduct(useCurrentUser());
 
   // Wait until the agent stops typing before searching
   const search = useDebouncedValue(filters.search);
@@ -51,6 +60,19 @@ export default function CallLogs() {
   function handleUpdated(call) {
     replaceCall(call);
     setOpenCall(call);
+  }
+
+  async function deleteCall() {
+    setDeleting((current) => ({ ...current, isWorking: true, error: "" }));
+    try {
+      await api(`/calls/${deleting.call.id}`, { method: "DELETE" });
+      setDeleting(NOT_DELETING);
+      // Deleted the only call on a later page: step back instead of showing an empty page
+      if (calls.length === 1 && page > 1) setPage(page - 1);
+      else reload();
+    } catch (error) {
+      setDeleting((current) => ({ ...current, isWorking: false, error: error.message }));
+    }
   }
 
   let content;
@@ -87,6 +109,7 @@ export default function CallLogs() {
         isRefreshing={isLoading && calls.length > 0}
         skeletonRows={pageSize}
         onOpen={setOpenCall}
+        onDelete={canDelete ? (call) => setDeleting({ ...NOT_DELETING, call }) : undefined}
       />
     );
   }
@@ -117,6 +140,24 @@ export default function CallLogs() {
       </section>
 
       <CallDetailsDialog call={openCall} onClose={() => setOpenCall(null)} onUpdated={handleUpdated} />
+
+      <ConfirmDialog
+        isOpen={Boolean(deleting.call)}
+        title="Delete this call?"
+        confirmText="Delete call"
+        isWorking={deleting.isWorking}
+        error={deleting.error}
+        onConfirm={deleteCall}
+        onCancel={() => setDeleting(NOT_DELETING)}
+      >
+        {deleting.call && (
+          <>
+            The call with <span className="font-semibold text-foreground">{deleting.call.mobile}</span> on{" "}
+            {formatDateTime(deleting.call.calledAt)} is removed for good, from the logs, the dashboard and
+            performance. This can&apos;t be undone.
+          </>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }
