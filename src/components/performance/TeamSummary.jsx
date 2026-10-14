@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Placeholder } from "@/components/ui/Card";
 import Sparkline from "@/components/ui/Sparkline";
+import { canManageProduct } from "@/config/roles";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDuration } from "@/lib/format";
 import { describePeople, formatRange, formatRate } from "@/lib/performance";
 import { cn } from "@/lib/utils";
 
 /** The headline card: everyone picked, added together, with calls per day underneath. */
 export default function TeamSummary({ report }) {
+  const user = useCurrentUser();
   if (!report) return <Placeholder height="h-52" />;
 
   const { team, agents, range, closedStatuses } = report;
@@ -40,9 +43,14 @@ export default function TeamSummary({ report }) {
       {closedStatuses.length === 0 && (
         <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
           No status is marked “Closes call” yet, so nothing counts as resolved.{" "}
-          <Link href="/settings/statuses" className="font-semibold text-accent-text hover:underline">
-            Choose them in Settings
-          </Link>
+          {/* Only admins can open Settings */}
+          {canManageProduct(user) ? (
+            <Link href="/settings/statuses" className="font-semibold text-accent-text hover:underline">
+              Choose them in Settings
+            </Link>
+          ) : (
+            "Ask your product admin to choose them."
+          )}
         </p>
       )}
     </section>

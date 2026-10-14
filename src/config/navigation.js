@@ -48,7 +48,6 @@ const NAV_GROUPS = [
         href: "/overview/performance",
         description: "Agent and team performance metrics",
         icon: Gauge,
-        adminOnly: true,
       },
     ],
   },
@@ -114,16 +113,11 @@ const NAV_GROUPS = [
 ];
 
 /**
- * The groups this user may see. Groups and items marked `adminOnly` (Performance,
- * Management, Settings) are for product admins; the super admin also gets their console,
- * plus the pages of whichever product is open.
+ * The groups this user may see. Management and Settings are for product admins; the
+ * super admin also gets their console, plus the pages of whichever product is open.
  */
 export function getNavGroups(user) {
-  const isAdmin = canManageProduct(user);
-  const productGroups = NAV_GROUPS.filter((group) => !group.adminOnly || isAdmin).map((group) => ({
-    ...group,
-    items: group.items.filter((item) => !item.adminOnly || isAdmin),
-  }));
+  const productGroups = NAV_GROUPS.filter((group) => !group.adminOnly || canManageProduct(user));
   if (!user?.isSuperAdmin) return productGroups;
   return [SUPER_ADMIN_GROUP, ...(user.product ? productGroups : [])];
 }
