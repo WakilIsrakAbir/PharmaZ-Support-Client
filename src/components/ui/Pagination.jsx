@@ -7,7 +7,7 @@ const GAP = "…";
  * The page numbers to show: always the first and last page, plus the pages
  * around the current one. 20 pages, on page 9 -> 1 … 8 9 10 … 20
  */
-export function getPageItems(page, totalPages) {
+function getPageItems(page, totalPages) {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
   if (page <= 4) return [1, 2, 3, 4, 5, GAP, totalPages];
   if (page >= totalPages - 3) {

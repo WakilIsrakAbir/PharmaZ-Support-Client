@@ -33,7 +33,7 @@ const SUPER_ADMIN_GROUP = {
 };
 
 /** The pages inside a product. */
-export const NAV_GROUPS = [
+const NAV_GROUPS = [
   {
     label: "Overview",
     items: [

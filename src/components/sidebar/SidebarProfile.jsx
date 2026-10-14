@@ -2,8 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronUp, LogOut, Palette, UserRound } from "lucide-react";
-import { openThemeSettings } from "@/components/theme/ThemeSettings";
+import { ChevronUp, LogOut, UserRound } from "lucide-react";
 import { roleOf } from "@/config/roles";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useDismiss } from "@/hooks/useDismiss";
@@ -44,18 +43,6 @@ export default function SidebarProfile({ onNavigate }) {
           <UserRound className="size-4 text-accent-text" />
           My Profile
         </Link>
-        <button
-          type="button"
-          onClick={() => {
-            setIsOpen(false);
-            onNavigate?.();
-            openThemeSettings();
-          }}
-          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-elevated"
-        >
-          <Palette className="size-4 text-accent-text" />
-          Appearance
-        </button>
         <button
           type="button"
           onClick={logOut}

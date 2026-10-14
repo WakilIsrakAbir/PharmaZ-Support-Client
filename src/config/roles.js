@@ -11,7 +11,7 @@ export const ROLES = {
 };
 
 // Not a product role: the super admin sits above every product
-export const SUPER_ADMIN = {
+const SUPER_ADMIN = {
   label: "Super Admin",
   description: "Runs every product: creates them, appoints their admins and can open any of them.",
 };

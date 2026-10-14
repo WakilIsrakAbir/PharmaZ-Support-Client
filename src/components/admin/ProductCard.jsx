@@ -5,25 +5,47 @@ import { cn } from "@/lib/utils";
 
 /**
  * One product on the super admin's home: who runs it, how big its team is and how busy
- * it is. Everything inside uses the product's own colour (data-accent).
+ * it is. The card follows the app's colour, so every card matches whatever theme is
+ * picked; the product's own colour is the small dot by its name.
  */
 export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmins, onArchive }) {
   const { isArchived } = product;
 
   return (
     <article
-      data-accent={product.accentColor}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200",
-        isArchived ? "opacity-75" : "hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10",
+        isArchived ? "opacity-75" : "hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md",
       )}
     >
-      <div className={cn("relative h-20 bg-linear-to-br from-accent-strong to-accent", isArchived && "grayscale")}>
-        <div aria-hidden className="bg-crosshatch absolute inset-0 opacity-10" />
-        <div className="absolute right-3 top-3">
+      {/* Clean, minimalist header without loud gradients or crosshatch patterns */}
+      <header className="border-b border-border/60 p-5">
+        <div className="flex items-center gap-3.5">
+          <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-border bg-elevated text-base font-bold text-foreground">
+            {productInitials(product.name)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="flex items-center gap-2">
+              <span className="truncate text-base font-semibold text-foreground">{product.name}</span>
+              {isArchived && (
+                <span className="shrink-0 rounded-md bg-elevated px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted">
+                  Archived
+                </span>
+              )}
+            </h3>
+            <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted">
+              {/* data-accent gives the dot the product's own colour */}
+              <span
+                data-accent={product.accentColor}
+                title="The product's colour"
+                className="size-2 shrink-0 rounded-full bg-accent ring-1 ring-border"
+              />
+              <span className="truncate font-mono">{product.slug}</span>
+            </p>
+          </div>
           <ActionMenu
             label={`Actions for ${product.name}`}
-            buttonClassName="text-white/90 hover:bg-white/20 hover:text-white"
+            buttonClassName="text-muted hover:bg-elevated hover:text-foreground"
             items={[
               { label: "Edit details", icon: Pencil, onClick: onEdit },
               { label: "Manage admins", icon: ShieldCheck, onClick: onAdmins },
@@ -33,32 +55,12 @@ export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmi
             ]}
           />
         </div>
-      </div>
+      </header>
 
-      <div className="-mt-8 flex flex-1 flex-col px-5 pb-5">
-        <span
-          className={cn(
-            "relative grid size-14 place-items-center rounded-2xl bg-surface text-lg font-extrabold text-accent-text shadow-md ring-4 ring-surface",
-            isArchived && "grayscale",
-          )}
-        >
-          {productInitials(product.name)}
-        </span>
+      <div className="flex flex-1 flex-col p-5 pt-4">
+        <p className="line-clamp-2 min-h-10 text-sm text-muted">{product.description || "No description yet."}</p>
 
-        <div className="mt-3 min-w-0">
-          <h3 className="flex items-center gap-2">
-            <span className="truncate text-lg font-bold tracking-tight">{product.name}</span>
-            {isArchived && (
-              <span className="shrink-0 rounded-md bg-elevated px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted">
-                Archived
-              </span>
-            )}
-          </h3>
-          <p className="truncate font-mono text-xs text-muted">{product.slug}</p>
-          <p className="mt-2 line-clamp-2 min-h-10 text-sm text-muted">{product.description || "No description yet."}</p>
-        </div>
-
-        <dl className="mt-4 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-background/40 text-center">
+        <dl className="mt-4 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-elevated/40 text-center">
           <Stat label="Agents" value={product.agentCount} />
           <Stat label="Today" value={product.callsToday} />
           <Stat label="All calls" value={product.callsTotal} />
@@ -74,7 +76,7 @@ export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmi
             <button
               type="button"
               onClick={onArchive}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-semibold transition-colors hover:bg-elevated"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-elevated"
             >
               <ArchiveRestore className="size-4" />
               Restore
@@ -84,10 +86,14 @@ export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmi
               type="button"
               onClick={onOpen}
               disabled={isOpening}
-              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-accent-strong px-3.5 py-2 text-sm font-semibold text-accent-foreground shadow-md shadow-accent/30 transition-all hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-80"
+              className="group/btn flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-border bg-elevated px-3.5 py-2 text-sm font-medium text-foreground transition-all hover:bg-elevated/80 active:scale-[0.98] disabled:cursor-wait disabled:opacity-80"
             >
               Open dashboard
-              {isOpening ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+              {isOpening ? (
+                <LoaderCircle className="size-4 animate-spin text-muted" />
+              ) : (
+                <ArrowRight className="size-4 text-muted transition-transform group-hover/btn:translate-x-0.5" />
+              )}
             </button>
           )}
         </div>

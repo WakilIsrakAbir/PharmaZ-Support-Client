@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import ThemeScript from "@/components/theme/ThemeScript";
 import ThemeSettings from "@/components/theme/ThemeSettings";
+import { BRAND } from "@/config/brand";
 import { DEFAULT_ACCENT, DEFAULT_MODE } from "@/config/theme";
 import "./globals.css";
 
@@ -16,10 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: "Demo Support Tool",
-    template: "%s | Demo Support Tool",
+    default: `${BRAND.name} ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name} ${BRAND.tagline}`,
   },
-  description: "Demo Support Tool",
+  description: `${BRAND.name} ${BRAND.tagline}: log customer calls and run support for every product.`,
   // The icon comes from src/app/icon.png, which Next.js links automatically
 };
 

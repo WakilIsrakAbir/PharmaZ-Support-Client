@@ -1,51 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Settings, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useDismiss } from "@/hooks/useDismiss";
 import { useTheme } from "@/hooks/useTheme";
+import { BRAND } from "@/config/brand";
 import { cn } from "@/lib/utils";
 import AccentOptions from "./AccentOptions";
 import ModeOptions from "./ModeOptions";
 
-// Opened from "Appearance" in the sidebar's profile menu, so it doesn't sit over pages
-let isPanelOpen = false;
-const listeners = new Set();
-
-function setPanelOpen(value) {
-  isPanelOpen = value;
-  listeners.forEach((listener) => listener());
-}
-
-export function openThemeSettings() {
-  setPanelOpen(true);
-}
-
-function subscribe(listener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
 export default function ThemeSettings() {
-  const isOpen = useSyncExternalStore(
-    subscribe,
-    () => isPanelOpen,
-    () => false,
-  );
-  const setIsOpen = setPanelOpen;
+  const [isOpen, setIsOpen] = useState(false);
   const { mode, accent, setMode, setAccent } = useTheme();
 
   const panelRef = useRef(null);
+  const triggerRef = useRef(null);
   const closeButtonRef = useRef(null);
 
   useDismiss(panelRef, () => setIsOpen(false), isOpen);
 
   // While the panel is open, stop the page behind it from scrolling and move
-  // focus inside. When it closes, focus goes back to where it was.
+  // focus inside. When it closes, focus goes back to the settings button.
   useEffect(() => {
     if (!isOpen) return;
 
-    const trigger = document.activeElement;
+    const trigger = triggerRef.current;
     // Fill the space the scrollbar leaves behind, so the page doesn't jump sideways.
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
@@ -62,6 +41,17 @@ export default function ThemeSettings() {
 
   return (
     <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open theme settings"
+        aria-expanded={isOpen}
+        className="fixed right-0 top-1/2 z-30 cursor-pointer -translate-y-1/2 rounded-l-2xl bg-accent-strong p-3 text-accent-foreground shadow-lg shadow-accent/40 transition-all duration-300 hover:pr-4"
+      >
+        <Settings className="size-6 animate-[spin_4s_linear_infinite]" />
+      </button>
+
       <div
         aria-hidden="true"
         className={cn(
@@ -111,7 +101,7 @@ export default function ThemeSettings() {
         </div>
 
         <footer className="border-t border-border px-6 py-4 text-center text-xs font-medium text-accent-text">
-          Demo Support Tool • Theme Engine
+          {BRAND.name} {BRAND.tagline} • Theme Engine
         </footer>
       </aside>
     </>

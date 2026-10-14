@@ -151,8 +151,10 @@ function UsersManager({ currentUserId, isSuperAdmin }) {
                 setPage(1);
               }}
               className={cn(
-                "w-full cursor-pointer appearance-none rounded-xl border bg-transparent py-2.5 pl-3 pr-9 text-sm font-semibold outline-none transition-colors hover:bg-elevated/60 focus:border-accent",
-                role ? "border-accent/50 bg-accent/10 text-accent-text" : "border-transparent",
+                "w-full cursor-pointer appearance-none rounded-xl border py-2.5 pl-3 pr-9 text-sm font-semibold outline-none transition-colors hover:bg-elevated/60 focus:border-accent [&>option]:bg-surface [&>option]:text-foreground",
+                role
+                  ? "border-accent/50 bg-accent/10 text-accent-text"
+                  : "border-transparent bg-transparent text-foreground",
               )}
             >
               {ROLE_OPTIONS.map((option) => (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { cn } from "@/lib/utils";
 import SidebarBrand from "./SidebarBrand";
 import SidebarNav from "./SidebarNav";
@@ -10,6 +11,7 @@ import SidebarProfile from "./SidebarProfile";
 
 /** Phones and tablets: a slim top bar, and the sidebar slides in as a drawer. */
 export default function MobileSidebar() {
+  const user = useCurrentUser();
   const [isOpen, setIsOpen] = useState(false);
   const close = () => setIsOpen(false);
 
@@ -39,7 +41,8 @@ export default function MobileSidebar() {
         >
           <Menu className="size-5" />
         </button>
-        <Logo />
+        {/* Inside a product, the top bar names it, like the sidebar does */}
+        <Logo name={user?.product?.name} />
       </header>
 
       <div className={cn("fixed inset-0 z-50 lg:hidden", !isOpen && "pointer-events-none")} inert={!isOpen}>

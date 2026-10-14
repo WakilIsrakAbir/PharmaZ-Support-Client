@@ -206,8 +206,10 @@ function FilterSelect({ label, value, options, onChange }) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
-          "w-full cursor-pointer appearance-none rounded-xl border bg-transparent py-2.5 pl-3 pr-9 text-sm font-semibold outline-none transition-colors hover:bg-elevated/60 focus:border-accent lg:w-48",
-          value ? "border-accent/50 bg-accent/10 text-accent-text" : "border-transparent",
+          "w-full cursor-pointer appearance-none rounded-xl border py-2.5 pl-3 pr-9 text-sm font-semibold outline-none transition-colors hover:bg-elevated/60 focus:border-accent lg:w-48 [&>option]:bg-surface [&>option]:text-foreground",
+          value
+            ? "border-accent/50 bg-accent/10 text-accent-text"
+            : "border-transparent bg-transparent text-foreground",
         )}
       >
         {options.map((option) => (

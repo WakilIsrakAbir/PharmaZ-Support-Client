@@ -26,7 +26,16 @@
 
   --accent: #10b981;
   --accent-foreground: #ffffff;
+}
 
+/*
+ * Shades worked out from --accent. They're declared again on every [data-accent]
+ * element (not only :root), because a custom property is resolved where it's declared:
+ * otherwise a product card with its own data-accent would keep the page's shades and
+ * mix two colours.
+ */
+:root,
+[data-accent] {
   /* Darker shade for filled buttons, and a shade that stays readable as text */
   --accent-strong: color-mix(in oklab, var(--accent) 78%, black);
 
@@ -36,6 +45,12 @@
     color-mix(in oklab, var(--accent) 72%, black),
     color-mix(in oklab, var(--accent) 78%, white)
   );
+}
+
+/* Amber is light, so its filled shade goes darker to keep white text readable on it */
+[data-accent="amber"] {
+  --accent-strong: color-mix(in oklab, var(--accent) 66%, black);
+  --sidebar: color-mix(in oklab, var(--accent) 74%, black);
 }
 
 [data-theme="light"] {
@@ -76,7 +91,6 @@
 
 [data-accent="amber"] {
   --accent: #f59e0b;
-  --accent-foreground: #1f1503;
 }
 
 @theme inline {
@@ -120,6 +134,54 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
     }
+  }
+
+  /*
+   * Form controls: native select & dropdown option styling.
+   * Fixes unreadable white-on-white text, muddy gray backgrounds, and washed-out popups
+   * in dark mode on Windows / Chromium / Firefox / Safari.
+   */
+  select {
+    color-scheme: light dark;
+  }
+
+  [data-theme="dark"] select,
+  :root:not([data-theme="light"]) select {
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] select {
+    color-scheme: light;
+  }
+
+  select option,
+  select optgroup {
+    background-color: var(--surface);
+    color: var(--foreground);
+    padding: 0.5rem 0.75rem;
+  }
+
+  [data-theme="dark"] select option,
+  [data-theme="dark"] select optgroup,
+  :root:not([data-theme="light"]) select option,
+  :root:not([data-theme="light"]) select optgroup {
+    background-color: #0f1721;
+    color: #e4ece8;
+  }
+
+  [data-theme="light"] select option,
+  [data-theme="light"] select optgroup {
+    background-color: #ffffff;
+    color: #0f1d17;
+  }
+
+  select option:checked {
+    background-color: #162620;
+    color: var(--accent-text);
+  }
+
+  select option:disabled {
+    color: var(--muted);
   }
 }
 

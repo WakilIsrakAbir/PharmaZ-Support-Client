@@ -18,7 +18,7 @@ function update(next) {
   listeners.forEach((listener) => listener());
 }
 
-export function setProductSetup(setup) {
+function setProductSetup(setup) {
   update({ setup, error: "" });
 }
 
@@ -29,12 +29,6 @@ function loadProductSetup() {
       request = null;
       update({ error: error.message });
     });
-}
-
-/** Loads it again, e.g. after the super admin opens another product. */
-export function reloadProductSetup() {
-  request = null;
-  loadProductSetup();
 }
 
 /** `{ setup, error }`. `setup` is null while it's still loading. */

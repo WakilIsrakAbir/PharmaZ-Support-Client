@@ -1,4 +1,5 @@
 import { ClipboardCheck, Headset, PhoneCall, TrendingUp } from "lucide-react";
+import { BRAND } from "@/config/brand";
 
 const highlights = [
   { icon: PhoneCall, title: "Log calls in seconds", text: "Only a mobile number is required to save a call." },
@@ -19,15 +20,15 @@ export default function BrandPanel() {
           <Headset className="size-5" />
         </span>
         <span className="leading-none">
-          <span className="block text-lg font-extrabold tracking-tight">PharmaZ.247</span>
+          <span className="block text-lg font-extrabold tracking-tight">{BRAND.name}</span>
           <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] opacity-80">
-            Support Tool
+            {BRAND.tagline}
           </span>
         </span>
       </div>
 
       <div className="relative my-auto max-w-md py-12">
-        <h2 className="text-4xl font-bold leading-tight">Support every pharmacy, one call at a time.</h2>
+        <h2 className="text-4xl font-bold leading-tight">Support every customer, one call at a time.</h2>
         <p className="mt-4 text-base opacity-85">
           The workspace support teams use to log calls, track issues and keep quality high, one product at a time.
         </p>
@@ -47,7 +48,7 @@ export default function BrandPanel() {
         </ul>
       </div>
 
-      <p className="relative text-xs opacity-70">© 2026 PharmaZ247. All rights reserved.</p>
+      <p className="relative text-xs opacity-70">© 2026 {BRAND.name}. All rights reserved.</p>
     </aside>
   );
 }

@@ -30,10 +30,13 @@ export function Field({ label, htmlFor, required, optional, hint, help, error, l
   );
 }
 
+export const selectClass =
+  "w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground outline-none transition-colors hover:border-accent/40 focus:border-accent focus:ring-4 focus:ring-accent/15 [&>option]:bg-surface [&>option]:text-foreground [&>optgroup]:bg-surface [&>optgroup]:text-foreground";
+
 export function Select({ className, children, ...props }) {
   return (
     <div className="relative">
-      <select className={cn(inputClass, "cursor-pointer appearance-none pr-10", className)} {...props}>
+      <select className={cn(selectClass, "cursor-pointer appearance-none pr-10", className)} {...props}>
         {children}
       </select>
       <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted" />

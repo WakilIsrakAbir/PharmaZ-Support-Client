@@ -129,7 +129,7 @@ function PageSizeSelect({ value, onChange }) {
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         aria-label="Rows per page"
-        className="cursor-pointer appearance-none rounded-lg border border-border bg-transparent py-1 pl-2.5 pr-7 text-sm font-semibold text-foreground outline-none hover:bg-elevated focus:border-accent"
+        className="cursor-pointer appearance-none rounded-lg border border-border bg-surface py-1 pl-2.5 pr-7 text-sm font-semibold text-foreground outline-none hover:bg-elevated focus:border-accent [&>option]:bg-surface [&>option]:text-foreground"
       >
         {PAGE_SIZES.map((size) => (
           <option key={size} value={size}>

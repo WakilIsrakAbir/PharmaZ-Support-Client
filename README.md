@@ -1,4 +1,4 @@
-# Support Tool — client
+# Tulip Tech Support Tool — client
 
 The web app for the support tool (Next.js 16, React 19, Tailwind 4). It talks only to
 the Express API in `../server`; every `/api/*` request is forwarded there (see
