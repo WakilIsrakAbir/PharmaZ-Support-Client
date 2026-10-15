@@ -1,30 +1,25 @@
 import { Check } from "lucide-react";
 import FormAlert from "@/components/auth/FormAlert";
 import SubmitButton from "@/components/auth/SubmitButton";
-import CustomFieldInputs, { toInputValues } from "@/components/log-call/CustomFieldInputs";
 import { Field, Select, inputClass } from "@/components/ui/FormControls";
 import { useForm } from "@/hooks/useForm";
 import { useProductSetup } from "@/hooks/useProductSetup";
 import { api } from "@/lib/api";
-import { fieldsWithAnswers, selectableOptions } from "@/lib/product-setup";
+import { selectableOptions } from "@/lib/product-setup";
 import { DialogBody, DialogFooter, secondaryButtonClass } from "@/components/ui/DialogParts";
 
-/** Changes how a call ended up, its notes and its extra fields. Who, when and what can't change. */
+/** Changes how a call ended up and its notes. Who, when and what can't change. */
 export default function EditCallForm({ call, onCancel, onSaved }) {
   const { setup } = useProductSetup();
-  const savedAnswers = toInputValues(call.customFields);
-  const fields = fieldsWithAnswers(setup?.customFields, call.customFields);
 
-  const { values, errors, formError, isSubmitting, handleChange, setValue, handleSubmit } = useForm({
+  const { values, errors, formError, isSubmitting, handleChange, handleSubmit } = useForm({
     initialValues: {
       status: call.status ?? "",
       priority: call.priority ?? "",
       outcome: call.outcome ?? "",
       comments: call.comments ?? "",
-      customFields: savedAnswers,
     },
-    onSubmit: async ({ customFields, ...formValues }) => {
-      const body = { ...formValues, ...changedAnswers(savedAnswers, customFields) };
+    onSubmit: async (body) => {
       const { data } = await api(`/calls/${call.id}`, { method: "PATCH", body });
       onSaved(data);
     },
@@ -55,18 +50,6 @@ export default function EditCallForm({ call, onCancel, onSaved }) {
             />
           </Field>
         </div>
-
-        {fields.length > 0 && (
-          <CustomFieldInputs
-            idPrefix="edit-field"
-            fields={fields}
-            values={values.customFields}
-            errors={errors}
-            onChange={(key, value) =>
-              setValue("customFields", { ...values.customFields, [key]: value }, `customFields.${key}`)
-            }
-          />
-        )}
 
         <Field label="Outcome" htmlFor="edit-outcome" optional error={errors.outcome}>
           <textarea
@@ -117,14 +100,4 @@ function OptionSelect({ value, options, ...props }) {
       ))}
     </Select>
   );
-}
-
-/**
- * Only the answers that changed are sent, so a call logged before a field became
- * required can still be updated. An emptied answer is sent as null, which clears it.
- */
-function changedAnswers(saved, edited) {
-  const changed = Object.entries(edited).filter(([key, value]) => value !== (saved[key] ?? ""));
-  if (changed.length === 0) return {};
-  return { customFields: Object.fromEntries(changed.map(([key, value]) => [key, value === "" ? null : value])) };
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Flag, Tags } from "lucide-react";
-import FormFieldsEditor from "./FormFieldsEditor";
 import GeneralSettings from "./GeneralSettings";
 import OptionListEditor from "./OptionListEditor";
 import ProblemAreasSettings from "./ProblemAreasSettings";
@@ -43,8 +42,4 @@ export function StatusesView() {
       )}
     </SetupGate>
   );
-}
-
-export function FormFieldsView() {
-  return <SetupGate>{(setup) => <FormFieldsEditor saved={setup.customFields} />}</SetupGate>;
 }

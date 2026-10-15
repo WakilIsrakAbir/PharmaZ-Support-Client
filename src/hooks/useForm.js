@@ -17,7 +17,7 @@ export function useForm({ initialValues, validate = () => ({}), onSubmit }) {
     setValue(event.target.name, event.target.value);
   }
 
-  /** For values that aren't a plain input, e.g. setValue("customFields", {...}). */
+  /** For values that aren't a plain input, e.g. setValue("accentColor", "teal"). */
   function setValue(name, value, errorName = name) {
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [errorName]: undefined }));
@@ -46,7 +46,7 @@ export function useForm({ initialValues, validate = () => ({}), onSubmit }) {
     } catch (error) {
       const fields = error.fields ?? {};
       // A problem with something that isn't a visible field (e.g. a reset link) goes on top.
-      // "customFields.branch" belongs to the customFields value.
+      // "admin.email" belongs to the admin value.
       const hiddenField = Object.keys(fields).find((name) => !(name.split(".")[0] in values));
 
       setErrors(fields);

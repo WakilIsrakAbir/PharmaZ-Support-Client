@@ -7,7 +7,6 @@ import {
   ScrollText,
   SlidersHorizontal,
   Tags,
-  TextCursorInput,
   Users,
   UsersRound,
 } from "lucide-react";
@@ -102,12 +101,6 @@ const NAV_GROUPS = [
         description: "Options for logging and updating calls",
         icon: Tags,
       },
-      {
-        label: "Form fields",
-        href: "/settings/form-fields",
-        description: "Extra questions on the call form",
-        icon: TextCursorInput,
-      },
     ],
   },
 ];
@@ -125,4 +118,12 @@ export function getNavGroups(user) {
 /** True when `pathname` is `href` itself or a page nested under it. */
 export function isActivePath(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * True on the pages that work inside one product (Dashboard, Logs, Settings...), where the
+ * super admin gets the product picker beside the title. The console and Profile aren't.
+ */
+export function isProductPath(pathname) {
+  return NAV_GROUPS.some((group) => group.items.some((item) => isActivePath(pathname, item.href)));
 }

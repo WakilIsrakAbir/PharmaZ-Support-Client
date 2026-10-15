@@ -2,16 +2,16 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { CircleCheck, Flag, ListChecks, LoaderCircle, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
+import { CircleCheck, Flag, LoaderCircle, PhoneCall, RotateCcw, Send, UserRound, X } from "lucide-react";
 import FormAlert from "@/components/auth/FormAlert";
 import { Field, Select, inputClass } from "@/components/ui/FormControls";
 import FormSection from "@/components/ui/FormSection";
+import ProductSwitcher from "@/components/ui/ProductSwitcher";
 import { CALL_DIRECTIONS, OTHER_ISSUE } from "@/config/call-log";
 import { useProductSetup } from "@/hooks/useProductSetup";
 import { api } from "@/lib/api";
 import { defaultKey } from "@/lib/product-setup";
 import CallTimeBadge from "./CallTimeBadge";
-import CustomFieldInputs from "./CustomFieldInputs";
 import ProblemAreaPicker from "./ProblemAreaPicker";
 import SegmentedControl from "./SegmentedControl";
 
@@ -28,14 +28,13 @@ const EMPTY_FORM = {
   calledAt: "", // empty means "now"
   outcome: "",
   comments: "",
-  customFields: {}, // answers to the product's extra fields, by key
 };
 
 // Bangladeshi mobile numbers: 01XXXXXXXXX, optionally starting with +88 or 88
 const MOBILE_PATTERN = /^(\+?88)?01[3-9]\d{8}$/;
 const DURATION_PATTERN = /^\d{1,3}:[0-5]\d$/;
 
-function validate(form, fields) {
+function validate(form) {
   const errors = {};
   const mobile = form.mobile.replace(/[\s-]/g, "");
 
@@ -49,17 +48,11 @@ function validate(form, fields) {
     errors.duration = "Use minutes and seconds, like 03:45.";
   }
 
-  for (const field of fields) {
-    if (field.required && !form.customFields[field.key]?.trim()) {
-      errors[`customFields.${field.key}`] = `${field.label} is required.`;
-    }
-  }
-
   return errors;
 }
 
 /** The form's values in the shape POST /api/calls expects. */
-function toRequestBody({ duration, calledAt, area, status, priority, customFields, ...form }) {
+function toRequestBody({ duration, calledAt, area, status, priority, ...form }) {
   const [minutes, seconds] = duration.split(":").map(Number);
 
   return {
@@ -68,7 +61,6 @@ function toRequestBody({ duration, calledAt, area, status, priority, customField
     // Left empty, the server uses the product's defaults
     status: status || undefined,
     priority: priority || undefined,
-    customFields: Object.fromEntries(Object.entries(customFields).filter(([, value]) => value.trim())),
     durationSeconds: duration ? minutes * 60 + seconds : undefined,
     // The picker gives local time ("2026-10-13T15:20"). Left empty, the server uses "now".
     calledAt: calledAt ? new Date(calledAt).toISOString() : undefined,
@@ -88,7 +80,6 @@ export default function LogCallForm() {
   const areas = setup?.areas.filter((area) => area.isActive) ?? null;
   const priorities = setup?.priorities.filter((option) => option.isActive) ?? [];
   const statuses = setup?.statuses.filter((option) => option.isActive) ?? [];
-  const fields = setup?.customFields.filter((field) => field.isActive) ?? [];
   const selectedArea = areas?.find((area) => area.id === form.area);
   const issues = selectedArea
     ? [...selectedArea.issues.filter((issue) => issue.isActive).map((issue) => issue.label), OTHER_ISSUE]
@@ -96,12 +87,6 @@ export default function LogCallForm() {
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }));
-    if (errors[name]) setErrors((current) => ({ ...current, [name]: undefined }));
-  }
-
-  function updateAnswer(key, value) {
-    setForm((current) => ({ ...current, customFields: { ...current.customFields, [key]: value } }));
-    const name = `customFields.${key}`;
     if (errors[name]) setErrors((current) => ({ ...current, [name]: undefined }));
   }
 
@@ -120,7 +105,7 @@ export default function LogCallForm() {
     event.preventDefault();
     setFormError("");
 
-    const newErrors = validate(form, fields);
+    const newErrors = validate(form);
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       if (newErrors.mobile) mobileRef.current?.focus();
@@ -140,7 +125,6 @@ export default function LogCallForm() {
       if (durationSeconds) serverErrors.duration = durationSeconds;
 
       // Problems with a field that has no error slot (e.g. calledAt) go above the form
-      // ("customFields.branch" has its own slot under the Details section)
       const hiddenField = Object.keys(serverErrors).find((name) => !(name.split(".")[0] in EMPTY_FORM));
 
       setErrors(serverErrors);
@@ -156,7 +140,10 @@ export default function LogCallForm() {
       {/* Stays at the top while scrolling (under the phone top bar), so "Log call" is always in reach */}
       <div className="sticky top-16 z-30 -mt-4 lg:top-0 flex flex-wrap items-end justify-between gap-4 border-b border-border bg-background/95 pb-5 pt-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Log a Call</h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">Log a Call</h1>
+            <ProductSwitcher />
+          </div>
           <p className="mt-1 text-sm text-muted">Capture the customer and the call details.</p>
         </div>
 
@@ -213,7 +200,7 @@ export default function LogCallForm() {
               label="Mobile"
               htmlFor="mobile"
               required
-              hint={fields.some((field) => field.required) ? undefined : "the only field this form requires"}
+              hint="the only field this form requires"
               error={errors.mobile}
             >
               <input
@@ -348,12 +335,6 @@ export default function LogCallForm() {
             />
           </Field>
         </FormSection>
-
-        {fields.length > 0 && (
-          <FormSection icon={ListChecks} title="Details" subtitle={`What ${setup.product.name} also asks for`}>
-            <CustomFieldInputs fields={fields} values={form.customFields} errors={errors} onChange={updateAnswer} />
-          </FormSection>
-        )}
       </div>
     </form>
   );

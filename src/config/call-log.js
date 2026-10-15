@@ -1,6 +1,6 @@
 import { PhoneIncoming, PhoneOutgoing } from "lucide-react";
 
-// Problem areas, statuses, priorities and extra fields belong to each product and come
+// Problem areas, statuses and priorities belong to each product and come
 // from GET /api/product/setup (see hooks/useProductSetup.js). Only these stay fixed.
 
 // Every area also gets this as its last choice.

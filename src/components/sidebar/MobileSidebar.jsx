@@ -41,8 +41,8 @@ export default function MobileSidebar() {
         >
           <Menu className="size-5" />
         </button>
-        {/* Inside a product, the top bar names it, like the sidebar does */}
-        <Logo name={user?.product?.name} />
+        {/* Like the sidebar: the super admin sees the platform, everyone else their product */}
+        <Logo name={user?.isSuperAdmin ? undefined : user?.product?.name} />
       </header>
 
       <div className={cn("fixed inset-0 z-50 lg:hidden", !isOpen && "pointer-events-none")} inert={!isOpen}>
