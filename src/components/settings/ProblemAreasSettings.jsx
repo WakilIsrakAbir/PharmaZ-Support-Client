@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutGrid, Pencil, Plus } from "lucide-react";
+import { LayoutGrid, Pencil, Plus, Trash2 } from "lucide-react";
 import FormAlert from "@/components/auth/FormAlert";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import FormSection from "@/components/ui/FormSection";
 import Switch from "@/components/ui/Switch";
 import { areaIcon } from "@/config/area-icons";
@@ -10,6 +11,8 @@ import { saveProductSetup } from "@/hooks/useProductSetup";
 import { cn } from "@/lib/utils";
 import AreaDialog from "./AreaDialog";
 import { IconButton, MoveButtons } from "./ListParts";
+
+const NOT_DELETING = { area: null, isWorking: false, error: "" };
 
 /**
  * The cards on the Log a Call form. Switching an area on or off and reordering save
@@ -21,6 +24,7 @@ export default function ProblemAreasSettings({ areas }) {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [deleting, setDeleting] = useState(NOT_DELETING);
 
   async function run(id, path, options, message) {
     setError("");
@@ -40,6 +44,19 @@ export default function ProblemAreasSettings({ areas }) {
       ? `${area.name} is back on the Log a Call form.`
       : `${area.name} is switched off. Older calls keep it.`;
     run(area.id, `/areas/${area.id}`, { method: "PATCH", body: { isActive } }, message);
+  }
+
+  async function deleteArea() {
+    const { area } = deleting;
+    setDeleting((current) => ({ ...current, isWorking: true, error: "" }));
+    try {
+      await saveProductSetup(`/areas/${area.id}`, { method: "DELETE" });
+      setDeleting(NOT_DELETING);
+      setError("");
+      setNotice(`${area.name} was deleted. Older calls still show it.`);
+    } catch (requestError) {
+      setDeleting((current) => ({ ...current, isWorking: false, error: requestError.message }));
+    }
   }
 
   function move(area, step) {
@@ -123,6 +140,14 @@ export default function ProblemAreasSettings({ areas }) {
                   <IconButton label={`Edit ${area.name}`} onClick={() => setEditing(area)}>
                     <Pencil className="size-4" />
                   </IconButton>
+                  <IconButton
+                    label={`Delete ${area.name}`}
+                    tone="danger"
+                    onClick={() => setDeleting({ ...NOT_DELETING, area })}
+                    disabled={isBusy}
+                  >
+                    <Trash2 className="size-4" />
+                  </IconButton>
                 </li>
               );
             })}
@@ -140,6 +165,19 @@ export default function ProblemAreasSettings({ areas }) {
           setNotice(message);
         }}
       />
+
+      <ConfirmDialog
+        isOpen={Boolean(deleting.area)}
+        title={`Delete ${deleting.area?.name}?`}
+        confirmText="Delete area"
+        isWorking={deleting.isWorking}
+        error={deleting.error}
+        onConfirm={deleteArea}
+        onCancel={() => setDeleting(NOT_DELETING)}
+      >
+        The area and its issues are removed from the Log a Call form for good. Calls already logged with it keep
+        showing its name and issue. To hide it for a while instead, switch it off. This can&apos;t be undone.
+      </ConfirmDialog>
     </>
   );
 }

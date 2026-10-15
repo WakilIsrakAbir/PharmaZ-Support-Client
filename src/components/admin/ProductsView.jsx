@@ -19,11 +19,11 @@ export default function ProductsView() {
   const { items: products, extra, error, isLoading, reload, replaceItem } = usePagedList("/admin/products", timezoneQuery());
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
-  // { type: "create" | "edit" | "admins" | "archive", product }
+  // { type: "create" | "edit" | "admins" | "archive" | "delete", product }
   const [dialog, setDialog] = useState(null);
   const [openingId, setOpeningId] = useState(null);
-  const [archiveError, setArchiveError] = useState("");
-  const [isArchiving, setIsArchiving] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [isWorking, setIsWorking] = useState(false);
 
   const close = () => setDialog(null);
   // Plain values, read once: the React Compiler mishandles `dialog?.x` inside callbacks
@@ -44,14 +44,14 @@ export default function ProductsView() {
       // A full load: the sidebar, setup and pages all switch to the opened product
       await goTo(HOME_PATH);
     } catch (requestError) {
-      setArchiveError(requestError.message);
+      setActionError(requestError.message);
       setOpeningId(null);
     }
   }
 
   async function toggleArchive() {
     const product = dialogProduct;
-    setIsArchiving(true);
+    setIsWorking(true);
     try {
       const { data } = await api(`/admin/products/${product.id}${timezoneQuery()}`, {
         method: "PATCH",
@@ -60,9 +60,21 @@ export default function ProductsView() {
       replaceItem(data);
       close();
     } catch (requestError) {
-      setArchiveError(requestError.message);
+      setActionError(requestError.message);
     }
-    setIsArchiving(false);
+    setIsWorking(false);
+  }
+
+  async function deleteProduct() {
+    setIsWorking(true);
+    try {
+      await api(`/admin/products/${dialogProduct.id}`, { method: "DELETE" });
+      close();
+      reload();
+    } catch (requestError) {
+      setActionError(requestError.message);
+    }
+    setIsWorking(false);
   }
 
   const cards = (list) => (
@@ -76,8 +88,12 @@ export default function ProductsView() {
           onEdit={() => setDialog({ type: "edit", product })}
           onAdmins={() => setDialog({ type: "admins", product })}
           onArchive={() => {
-            setArchiveError("");
+            setActionError("");
             setDialog({ type: "archive", product });
+          }}
+          onDelete={() => {
+            setActionError("");
+            setDialog({ type: "delete", product });
           }}
         />
       ))}
@@ -160,7 +176,7 @@ export default function ProductsView() {
         <CreateButton onClick={() => setDialog({ type: "create" })} />
       </div>
 
-      {archiveError && !dialog && <p className="text-sm font-medium text-rose-500">{archiveError}</p>}
+      {actionError && !dialog && <p className="text-sm font-medium text-rose-500">{actionError}</p>}
 
       {content}
 
@@ -183,14 +199,35 @@ export default function ProductsView() {
         isOpen={dialogType === "archive"}
         title={dialogProduct?.isArchived ? `Restore ${dialogProduct.name}?` : `Archive ${dialogProduct?.name}?`}
         confirmText={dialogProduct?.isArchived ? "Restore" : "Archive"}
-        isWorking={isArchiving}
-        error={archiveError}
+        isWorking={isWorking}
+        error={actionError}
         onConfirm={toggleArchive}
-        onCancel={() => !isArchiving && close()}
+        onCancel={() => !isWorking && close()}
       >
         {dialogProduct?.isArchived
           ? "Its admin and agents can sign in and work in it again."
           : "Its admin and agents lose access straight away. Nothing is deleted: calls, setup and people stay, and you can restore it any time."}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        isOpen={dialogType === "delete"}
+        title={`Delete ${dialogProduct?.name} for good?`}
+        confirmText="Delete product"
+        isWorking={isWorking}
+        error={actionError}
+        onConfirm={deleteProduct}
+        onCancel={() => !isWorking && close()}
+      >
+        {dialogProduct && (
+          <>
+            Its{" "}
+            <span className="font-semibold text-foreground">
+              {dialogProduct.callsTotal.toLocaleString()} {dialogProduct.callsTotal === 1 ? "call" : "calls"}
+            </span>
+            , problem areas and setup are erased. Its people keep their accounts, without a product, so they can
+            be added to another one. This can&apos;t be undone.
+          </>
+        )}
       </ConfirmDialog>
     </div>
   );

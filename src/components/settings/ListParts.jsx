@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Check, RotateCcw, Undo2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, RotateCcw, Trash2, Undo2 } from "lucide-react";
 import SubmitButton from "@/components/auth/SubmitButton";
 import { cn } from "@/lib/utils";
 
@@ -48,9 +48,10 @@ export function MoveButtons({ name, index, count, onMove, disabled }) {
 
 /**
  * Items that were switched off. They stay on older calls; "Switch on" brings one back.
- * `children(item)` draws each one.
+ * `children(item)` draws each one. With `onDelete`, each also gets a Delete button;
+ * `deleteBlockedBy` (a reason) disables them, e.g. while there are unsaved changes.
  */
-export function SwitchedOffList({ items, title = "Switched off", onRestore, children }) {
+export function SwitchedOffList({ items, title = "Switched off", onRestore, onDelete, deleteBlockedBy, children }) {
   if (items.length === 0) return null;
 
   return (
@@ -70,6 +71,18 @@ export function SwitchedOffList({ items, title = "Switched off", onRestore, chil
               <Undo2 className="size-3.5" />
               Switch on
             </button>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(item)}
+                disabled={Boolean(deleteBlockedBy)}
+                title={deleteBlockedBy || "Delete for good"}
+                className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-500 transition-colors hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Trash2 className="size-3.5" />
+                Delete
+              </button>
+            )}
           </li>
         ))}
       </ul>

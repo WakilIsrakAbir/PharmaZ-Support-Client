@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, ArrowRight, LoaderCircle, Pencil, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowRight, LoaderCircle, Pencil, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import ActionMenu from "@/components/ui/ActionMenu";
 import { formatRelative, getInitials } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * it is. The card follows the app's colour, so every card matches whatever theme is
  * picked; the product's own colour is the small dot by its name.
  */
-export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmins, onArchive }) {
+export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmins, onArchive, onDelete }) {
   const { isArchived } = product;
 
   return (
@@ -49,9 +49,13 @@ export default function ProductCard({ product, isOpening, onOpen, onEdit, onAdmi
             items={[
               { label: "Edit details", icon: Pencil, onClick: onEdit },
               { label: "Manage admins", icon: ShieldCheck, onClick: onAdmins },
-              isArchived
-                ? { label: "Restore", icon: ArchiveRestore, onClick: onArchive }
-                : { label: "Archive", icon: Archive, onClick: onArchive, tone: "danger" },
+              // Deleting is offered only once a product is archived, so a live one can't be wiped by mistake
+              ...(isArchived
+                ? [
+                    { label: "Restore", icon: ArchiveRestore, onClick: onArchive },
+                    { label: "Delete for good", icon: Trash2, onClick: onDelete, tone: "danger" },
+                  ]
+                : [{ label: "Archive", icon: Archive, onClick: onArchive, tone: "danger" }]),
             ]}
           />
         </div>
